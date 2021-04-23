@@ -89,6 +89,15 @@
                     code
                 </mat-icon>
             </button>
+            <!--if activated in config.json, then the icon is visible and considered!-->
+            <button (click)="onToggleButtonClicked('MAP')"
+                    *ngIf="(config|async).get('query.options.map')"
+                    class="icon-button" matTooltip="Toggle map query term">
+                <mat-icon
+                        [attr.class]="containerModel.hasTerm('MAP') ? 'material-icons md-primary-250' : 'material-icons md-primary-100'">
+                    map
+                </mat-icon>
+            </button>
         </div>
     </div>
     <!-- Divider from header to content -->

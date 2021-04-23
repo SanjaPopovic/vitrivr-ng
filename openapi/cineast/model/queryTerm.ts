@@ -11,13 +11,13 @@
  */
 
 
-export interface QueryTerm { 
+export interface QueryTerm {
     type?: QueryTerm.TypeEnum;
     data?: string;
     categories?: Array<string>;
 }
 export namespace QueryTerm {
-    export type TypeEnum = 'IMAGE' | 'AUDIO' | 'MOTION' | 'MODEL3D' | 'LOCATION' | 'TIME' | 'TEXT' | 'TAG' | 'SEMANTIC' | 'ID' | 'BOOLEAN';
+    export type TypeEnum = 'IMAGE' | 'AUDIO' | 'MOTION' | 'MODEL3D' | 'LOCATION' | 'TIME' | 'TEXT' | 'TAG' | 'SEMANTIC' | 'ID' | 'BOOLEAN' | 'MAP';
     export const TypeEnum = {
         IMAGE: 'IMAGE' as TypeEnum,
         AUDIO: 'AUDIO' as TypeEnum,
@@ -29,7 +29,8 @@ export namespace QueryTerm {
         TAG: 'TAG' as TypeEnum,
         SEMANTIC: 'SEMANTIC' as TypeEnum,
         ID: 'ID' as TypeEnum,
-        BOOLEAN: 'BOOLEAN' as TypeEnum
+        BOOLEAN: 'BOOLEAN' as TypeEnum,
+        MAP: 'MAP' as TypeEnum
     };
 }
 
