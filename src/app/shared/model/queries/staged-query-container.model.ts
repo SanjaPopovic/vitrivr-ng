@@ -8,6 +8,7 @@ import {MotionQueryTerm} from './motion-query-term.model';
 import {TextQueryTerm} from './text-query-term.model';
 import {TagQueryTerm} from './tag-query-term.model';
 import {SemanticQueryTerm} from './semantic/semantic-query-term.model';
+import {MapQueryTerm} from './map/map-query-term.model';
 import {QueryStage} from './query-stage.model';
 import {QueryTerm} from '../../../../../openapi/cineast/model/queryTerm';
 
@@ -56,6 +57,9 @@ export class StagedQueryContainer implements QueryContainerInterface {
         break;
       case QueryTerm.TypeEnum.BOOLEAN:
         this._cache.set(type, new BoolQueryTerm());
+        break;
+      case QueryTerm.TypeEnum.MAP:
+        this._cache.set(type, new MapQueryTerm());
         break;
       default:
         return false;

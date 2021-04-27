@@ -1,6 +1,6 @@
 import {Component, Input, OnInit, ViewChild} from '@angular/core';
 import {SemanticQueryTerm} from '../../../shared/model/queries/semantic/semantic-query-term.model';
-import {MapQueryTermModel} from '../../../shared/model/queries/map/map-query-term.model';
+import {MapQueryTerm} from '../../../shared/model/queries/map/map-query-term.model';
 
 @Component({
   selector: 'app-qt-map',
@@ -14,7 +14,7 @@ export class MapQueryTermComponent implements OnInit {
   private previewingMap: any;
   /** The SemanticQueryTerm object associated with this SemanticQueryTermComponent. That object holds all the query-settings. */
   @Input()
-  private mapTerm: MapQueryTermModel;
+  private mapTerm: MapQueryTerm;
 
   constructor() {
   }

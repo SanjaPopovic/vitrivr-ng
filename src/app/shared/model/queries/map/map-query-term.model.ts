@@ -2,7 +2,7 @@ import {AbstractQueryTerm} from '../abstract-query-term.model';
 import {QueryTerm} from '../../../../../../openapi/cineast/model/queryTerm';
 
 
-export class MapQueryTermModel extends AbstractQueryTerm {
+export class MapQueryTerm extends AbstractQueryTerm {
 
   /** The image data associated with this SemanticQueryTerm. MAP INSTEAD OF IMAGE*/
   private _image: string;
