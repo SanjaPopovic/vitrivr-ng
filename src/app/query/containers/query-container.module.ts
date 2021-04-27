@@ -14,6 +14,7 @@ import {SemanticQueryTermModule} from './semantic/semantic-query-term.module';
 import {BoolQueryTermModule} from './bool/bool-query-term.module';
 import {TemporalDistanceModule} from '../temporal-distance/temporal-distance.module';
 import {QueryStageModule} from './query-stage.module';
+import {MapQueryTermModule} from './map/map-query-term.module';
 
 @NgModule({
   imports: [
@@ -28,6 +29,7 @@ import {QueryStageModule} from './query-stage.module';
     TextQueryTermModule,
     TagQueryTermModule,
     SemanticQueryTermModule,
+    MapQueryTermModule,
     BoolQueryTermModule,
     TemporalDistanceModule,
     QueryStageModule

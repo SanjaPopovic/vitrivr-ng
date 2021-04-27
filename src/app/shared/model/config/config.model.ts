@@ -96,7 +96,8 @@ export class Config {
         text: false,
         tag: true,
         semantic: false,
-        boolean: true
+        boolean: true,
+        map: true
       },
       config: {
         queryId: null,

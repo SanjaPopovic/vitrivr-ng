@@ -8,6 +8,7 @@ export enum InteractionEventType {
   QUERY_TAG,
   QUERY_SEMANTIC,
   QUERY_BOOLEAN,
+  QUERY_MAP,
   MLT,
   CLEAR,
   REFINE,

@@ -171,6 +171,9 @@ export class QueryService {
               context.set('q:value', (t as TagQueryTerm).tags);
               _components.push(new InteractionEventComponent(InteractionEventType.QUERY_TAG, context));
               return;
+            case 'MAP':
+              _components.push(new InteractionEventComponent(InteractionEventType.QUERY_MAP, context));
+              return;
           }
         })
       })
