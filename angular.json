@@ -25,6 +25,7 @@
             ],
             "styles": [
               "src/vitrivr-theme.scss",
+              "./node_modules/leaflet/dist/leaflet.css"
             ],
             "scripts": []
           },
