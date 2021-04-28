@@ -1,0 +1,6 @@
+#popUpMap {
+    height: 500px;
+    width: 900px;
+    border: rgb(235, 235, 235) solid 0.5px;
+    display: inline-block;
+}

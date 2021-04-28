@@ -1,0 +1,16 @@
+
+<mat-toolbar color="primary">
+    <span class="spacer-flex"></span>
+    <button (click)="close()" mat-icon-button matTooltip="Close window and save.">
+        <mat-icon>close</mat-icon>
+    </button>
+</mat-toolbar>
+<div style="display: flex; margin-top: 5px;">
+<div id="popUpMap" ></div>
+<div [style.margin-left]="'20px'" [style.width]="'200px'">
+    <mat-form-field>
+        <input aria-label="Select a concept" matInput
+               placeholder="Select a concept">
+    </mat-form-field>
+</div>
+</div>

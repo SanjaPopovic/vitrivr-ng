@@ -9,7 +9,7 @@ export class MapQueryTerm extends AbstractQueryTerm {
   private _image: string;
 
   constructor() {
-    super(QueryTerm.TypeEnum.MAP, ['semantic']); /**to change to map*/
+    super(QueryTerm.TypeEnum.MAP, ['map']); /**to change to map*/
   }
 
   /**
