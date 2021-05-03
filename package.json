@@ -36,6 +36,7 @@
     "flatted": "3.0.4",
     "jszip": "3.5.0",
     "leaflet": "^1.7.1",
+    "leaflet-draw": "^1.0.4",
     "ngx-color-picker": "11.0.0",
     "ngx-infinite-scroll": "10.0.1",
     "npm": "^6.14.11",
