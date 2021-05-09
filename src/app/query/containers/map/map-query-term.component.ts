@@ -69,7 +69,7 @@ export class MapQueryTermComponent implements OnInit {
     // console.log(this.mapState);
     const dialogRef = this._dialog.open(MapDialogComponent, {data: {mapState: this.mapState}});
     dialogRef.afterClosed().subscribe(result => {
-      if (result && result.length !== 0) {
+      if (result) {
         // console.log('result:');
         this.mapState = result;
         // this.map.invalidateSize();

@@ -29,6 +29,7 @@ export class MapDialogComponent implements OnInit {
     });
 
     // --------update to previous map state regarding circles
+    const items = [];
     this.mapState = this.data.mapState;
     for (const elem of this.mapState) {
       if (elem[0].match('circle') != null) {
@@ -40,7 +41,8 @@ export class MapDialogComponent implements OnInit {
           fillOpacity: 0
         }
         // console.log(center, elem[3], circleOptions);
-        L.circle([elem[2], elem[1]], elem[3], circleOptions).addTo(this.popUpMap);
+        const circle = L.circle([elem[2], elem[1]], elem[3], circleOptions);
+        circle.addTo(this.popUpMap);
         /*const circleCenter = [40.72, -74.00];
         const circleOptions = {
           color: 'red',
@@ -48,6 +50,7 @@ export class MapDialogComponent implements OnInit {
           fillOpacity: 0
         }
         const circle = L.circle(circleCenter, 50000, circleOptions);*/
+        items.push(circle)
       } else if (elem[0].match('path') != null) {
         // console.log('PATH');
         // const path = L.path()
@@ -58,7 +61,7 @@ export class MapDialogComponent implements OnInit {
 
 
 
-    const drawnItems = new L.FeatureGroup();
+    const drawnItems = new L.FeatureGroup(items);
     this.popUpMap.addLayer(drawnItems);
 
     const drawControl = new L.Control.Draw({
@@ -77,7 +80,6 @@ export class MapDialogComponent implements OnInit {
     });
     this.popUpMap.addControl(drawControl);
 
-    const filterCoordinates = [];
     this.popUpMap.on('draw:created', function (e) {
       const type = e.layerType,
         layer = e.layer;
@@ -122,7 +124,7 @@ export class MapDialogComponent implements OnInit {
         filterCoordinates.push(pathInfo);
       }
     });
-    // console.log(filterCoordinates);
+    console.log(filterCoordinates);
     this._dialogRef.close(filterCoordinates);
   }
 }
