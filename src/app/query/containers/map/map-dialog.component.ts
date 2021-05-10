@@ -34,26 +34,22 @@ export class MapDialogComponent implements OnInit {
     for (const elem of this.mapState) {
       if (elem[0].match('circle') != null) {
         // console.log('CIRCLE');
-        const center = [elem[1], elem[2]];
         const circleOptions = {
           color: 'red',
           fillColor: '#f03',
           fillOpacity: 0
         }
-        // console.log(center, elem[3], circleOptions);
         const circle = L.circle([elem[2], elem[1]], elem[3], circleOptions);
         circle.addTo(this.popUpMap);
-        /*const circleCenter = [40.72, -74.00];
-        const circleOptions = {
-          color: 'red',
-          fillColor: '#f03',
-          fillOpacity: 0
-        }
-        const circle = L.circle(circleCenter, 50000, circleOptions);*/
         items.push(circle)
       } else if (elem[0].match('path') != null) {
         // console.log('PATH');
         // const path = L.path()
+        const latlngs = [...elem];
+        latlngs.shift(); // remove first element which is the indicator 'path'
+        const polyline = L.polyline(latlngs, {color: 'red'});
+        polyline.addTo(this.popUpMap);
+        items.push(polyline);
       }
     }
 
@@ -115,11 +111,12 @@ export class MapDialogComponent implements OnInit {
       if (layer instanceof L.Circle) {
         filterCoordinates.push(['circle', layer.getLatLng().lng, layer.getLatLng().lat, layer.getRadius()]);
       } else if (layer instanceof L.Path) {
-        const pathInfo = [];
+        console.log(layer);
+        const pathInfo = []; // pathInfo = ['path', [lat, lon], [lat, lon]]
         pathInfo.push('path');
         const latlngs = layer.getLatLngs();
         for (let i = 0; i < latlngs.length; i++) {
-          pathInfo.push([latlngs[i].lng, latlngs[i].lat])
+          pathInfo.push([latlngs[i].lat, latlngs[i].lng])
         }
         filterCoordinates.push(pathInfo);
       }
