@@ -6,6 +6,7 @@ import {MatDialog, MatDialogConfig} from '@angular/material/dialog';
 import {SemanticSketchDialogComponent} from '../semantic/semantic-sketch-dialog.component';
 import {first} from 'rxjs/operators';
 import {MapDialogComponent} from './map-dialog.component';
+import {Tag} from '../../../../../openapi/cineast';
 
 @Component({
   selector: 'app-qt-map',
@@ -44,20 +45,44 @@ export class MapQueryTermComponent implements OnInit {
     this.initMap();
   }
 
-  public updateMap(result: []) {
-    /*console.log(result);
-    // const drawnItems = new L.FeatureGroup();
-    // this.map.addLayer(drawnItems);
-    for (const elem of result) {
+  public updateMap() {
+    this.map.remove();
+    this.map = L.map('map', {
+      center: [ 47.5595986, 7.5885761 ],
+      zoom: 8
+    });
+
+    const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      minZoom: 1,
+      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    });
+
+    const items = [];
+
+    for (const elem of this.mapState) {
       if (elem[0].match('circle') != null) {
         // console.log('CIRCLE');
-        const circle = L.circle([elem[1], elem[2]], elem[3]); // (circle, long, lat, rad)
-        // circle.addTo(this.map);
+        const colorOptions = {
+          color: 'red',
+          fillColor: '#f03',
+          fillOpacity: 0
+        }
+        const circle = L.circle([elem[2], elem[1]], elem[3], colorOptions);
+        circle.addTo(this.map);
+        items.push(circle)
       } else if (elem[0].match('path') != null) {
         // console.log('PATH');
         // const path = L.path()
+        const latlngs = [...elem];
+        latlngs.shift(); // remove first element which is the indicator 'path'
+        const polyline = L.polyline(latlngs, {color: 'red'});
+        polyline.addTo(this.map);
+        items.push(polyline);
       }
-    }*/
+    }
+
+    tiles.addTo(this.map);
   }
 
   /**
@@ -69,12 +94,28 @@ export class MapQueryTermComponent implements OnInit {
     // console.log(this.mapState);
     const dialogRef = this._dialog.open(MapDialogComponent, {data: {mapState: this.mapState}});
     dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        // console.log('result:');
+      if (this.mapState.length > 0 && result.length === 0) {
+        this.mapState = [];
+        this.updateMap();
+        this.addRegion();
+      } else if (result.length !== 0 && JSON.stringify(result) !== JSON.stringify(this.mapState)) {
+        // console.log(result);
         this.mapState = result;
         // this.map.invalidateSize();
-        this.updateMap(result);
+        this.updateMap();
+        this.addRegion();
       }
     });
+  }
+
+  /**
+   * Add the specified region (at the moment: circle or path) to the list of regions. Take info from variable mapState.
+   * Removing a region also happens here.
+   * @param String The Region that should be added.
+   */
+  public addRegion() {
+    this.mapTerm.data = 'data:application/json;base64,' + btoa(JSON.stringify(this.mapState.map(v => {
+      return v;
+    })));
   }
 }

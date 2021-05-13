@@ -8,9 +8,14 @@
 <div style="display: flex; margin-top: 5px;">
 <div id="popUpMap" ></div>
 <div [style.margin-left]="'20px'" [style.width]="'200px'">
-    <mat-form-field>
-        <input aria-label="Select a concept" matInput
-               placeholder="Select a concept">
-    </mat-form-field>
+    <div *ngFor="let location of locations; let i = index">
+        <input type="text" [(ngModel)]="location.location" #name="ngModel" name="value{{i}}">
+        <button (click)="removeLocation(i)" mat-mini-fab color="primary" matTooltip="Add location">
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <button (click)="addLocation()" mat-mini-fab color="primary" matTooltip="Add location">
+        <mat-icon>add</mat-icon>
+    </button>
 </div>
 </div>

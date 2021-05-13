@@ -14,9 +14,10 @@ import {MapQueryTermComponent} from './map-query-term.component';
 export class MapDialogComponent implements OnInit {
   private popUpMap;
   private mapState;
+  locations = [];
   private initMap(): void {
-    console.log('map when opening popup');
-    console.log(this.data.mapState);
+    // console.log('map when opening popup');
+    // console.log(this.data.mapState);
     this.popUpMap = L.map('popUpMap', {
       center: [ 47.5595986, 7.5885761 ],
       zoom: 8
@@ -34,12 +35,12 @@ export class MapDialogComponent implements OnInit {
     for (const elem of this.mapState) {
       if (elem[0].match('circle') != null) {
         // console.log('CIRCLE');
-        const circleOptions = {
+        const colorOptions = {
           color: 'red',
           fillColor: '#f03',
           fillOpacity: 0
         }
-        const circle = L.circle([elem[2], elem[1]], elem[3], circleOptions);
+        const circle = L.circle([elem[2], elem[1]], elem[3], colorOptions);
         circle.addTo(this.popUpMap);
         items.push(circle)
       } else if (elem[0].match('path') != null) {
@@ -62,12 +63,25 @@ export class MapDialogComponent implements OnInit {
 
     const drawControl = new L.Control.Draw({
       draw: {
-        polyline: true,
+        polyline: {
+          shapeOptions: {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0
+          }
+        },
         polygon: false,
         circlemarker: false,
         rectangle: false,
         marker: false,
-        edit: false
+        edit: false,
+        circle: {
+          shapeOptions: {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0
+          },
+        }
       },
       edit: {
         featureGroup: drawnItems, // tell which layer is editable
@@ -102,6 +116,17 @@ export class MapDialogComponent implements OnInit {
     this.initMap();
   }
 
+  public addLocation() {
+    // console.log('Add button pressed');
+    this.locations.push({location: ''}); // new word
+    // console.log(this.locations);
+  }
+
+  public removeLocation(i) {
+    // console.log('Removed location');
+    this.locations.splice(i, 1);
+  }
+
   /**
    * Closes the dialog.
    */
@@ -111,7 +136,7 @@ export class MapDialogComponent implements OnInit {
       if (layer instanceof L.Circle) {
         filterCoordinates.push(['circle', layer.getLatLng().lng, layer.getLatLng().lat, layer.getRadius()]);
       } else if (layer instanceof L.Path) {
-        console.log(layer);
+        // console.log(layer);
         const pathInfo = []; // pathInfo = ['path', [lat, lon], [lat, lon]]
         pathInfo.push('path');
         const latlngs = layer.getLatLngs();
@@ -121,7 +146,7 @@ export class MapDialogComponent implements OnInit {
         filterCoordinates.push(pathInfo);
       }
     });
-    console.log(filterCoordinates);
+    // console.log(filterCoordinates);
     this._dialogRef.close(filterCoordinates);
   }
 }
