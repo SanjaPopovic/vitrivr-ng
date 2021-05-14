@@ -34,9 +34,8 @@ export class MapQueryTermComponent implements OnInit {
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
 
-
-
     tiles.addTo(this.map);
+
   }
 
   constructor(private _dialog: MatDialog) { }
@@ -46,43 +45,33 @@ export class MapQueryTermComponent implements OnInit {
   }
 
   public updateMap() {
-    this.map.remove();
-    this.map = L.map('map', {
-      center: [ 47.5595986, 7.5885761 ],
-      zoom: 8
+    this.map.eachLayer((layer) => {
+      if (!(layer instanceof L.TileLayer)) {
+        layer.remove();
+      }
     });
+    if (this.mapState.length > 0) {
+      const items = [];
 
-    const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      minZoom: 1,
-      attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-    });
-
-    const items = [];
-
-    for (const elem of this.mapState) {
-      if (elem[0].match('circle') != null) {
-        // console.log('CIRCLE');
-        const colorOptions = {
-          color: 'red',
-          fillColor: '#f03',
-          fillOpacity: 0
+      for (const elem of this.mapState) {
+        if (elem[0].match('circle') != null) {
+          const colorOptions = {
+            color: 'red',
+            fillColor: '#f03',
+            fillOpacity: 0
+          }
+          const circle = L.circle([elem[2], elem[1]], elem[3], colorOptions);
+          circle.addTo(this.map);
+          items.push(circle)
+        } else if (elem[0].match('path') != null) {
+          const latlngs = [...elem];
+          latlngs.shift(); // remove first element which is the indicator 'path'
+          const polyline = L.polyline(latlngs, {color: 'red'});
+          polyline.addTo(this.map);
+          items.push(polyline);
         }
-        const circle = L.circle([elem[2], elem[1]], elem[3], colorOptions);
-        circle.addTo(this.map);
-        items.push(circle)
-      } else if (elem[0].match('path') != null) {
-        // console.log('PATH');
-        // const path = L.path()
-        const latlngs = [...elem];
-        latlngs.shift(); // remove first element which is the indicator 'path'
-        const polyline = L.polyline(latlngs, {color: 'red'});
-        polyline.addTo(this.map);
-        items.push(polyline);
       }
     }
-
-    tiles.addTo(this.map);
   }
 
   /**
@@ -90,18 +79,14 @@ export class MapQueryTermComponent implements OnInit {
    * it should be edited; opens the MapDialogComponent
    */
   public onViewerClicked() {
-    // console.log('before start');
-    // console.log(this.mapState);
     const dialogRef = this._dialog.open(MapDialogComponent, {data: {mapState: this.mapState}});
     dialogRef.afterClosed().subscribe(result => {
-      if (this.mapState.length > 0 && result.length === 0) {
+      if (this.mapState.length > 0 && result.length === 0) { // delete everything on mini map
         this.mapState = [];
         this.updateMap();
         this.addRegion();
       } else if (result.length !== 0 && JSON.stringify(result) !== JSON.stringify(this.mapState)) {
-        // console.log(result);
         this.mapState = result;
-        // this.map.invalidateSize();
         this.updateMap();
         this.addRegion();
       }

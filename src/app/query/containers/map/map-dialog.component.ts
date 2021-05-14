@@ -16,8 +16,6 @@ export class MapDialogComponent implements OnInit {
   private mapState;
   locations = [];
   private initMap(): void {
-    // console.log('map when opening popup');
-    // console.log(this.data.mapState);
     this.popUpMap = L.map('popUpMap', {
       center: [ 47.5595986, 7.5885761 ],
       zoom: 8
@@ -29,12 +27,11 @@ export class MapDialogComponent implements OnInit {
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
 
-    // --------update to previous map state regarding circles
+    // update to previous map state regarding circles
     const items = [];
     this.mapState = this.data.mapState;
     for (const elem of this.mapState) {
       if (elem[0].match('circle') != null) {
-        // console.log('CIRCLE');
         const colorOptions = {
           color: 'red',
           fillColor: '#f03',
@@ -44,8 +41,6 @@ export class MapDialogComponent implements OnInit {
         circle.addTo(this.popUpMap);
         items.push(circle)
       } else if (elem[0].match('path') != null) {
-        // console.log('PATH');
-        // const path = L.path()
         const latlngs = [...elem];
         latlngs.shift(); // remove first element which is the indicator 'path'
         const polyline = L.polyline(latlngs, {color: 'red'});
@@ -55,8 +50,6 @@ export class MapDialogComponent implements OnInit {
     }
 
     tiles.addTo(this.popUpMap);
-
-
 
     const drawnItems = new L.FeatureGroup(items);
     this.popUpMap.addLayer(drawnItems);
@@ -117,13 +110,10 @@ export class MapDialogComponent implements OnInit {
   }
 
   public addLocation() {
-    // console.log('Add button pressed');
     this.locations.push({location: ''}); // new word
-    // console.log(this.locations);
   }
 
   public removeLocation(i) {
-    // console.log('Removed location');
     this.locations.splice(i, 1);
   }
 
@@ -136,7 +126,6 @@ export class MapDialogComponent implements OnInit {
       if (layer instanceof L.Circle) {
         filterCoordinates.push(['circle', layer.getLatLng().lng, layer.getLatLng().lat, layer.getRadius()]);
       } else if (layer instanceof L.Path) {
-        // console.log(layer);
         const pathInfo = []; // pathInfo = ['path', [lat, lon], [lat, lon]]
         pathInfo.push('path');
         const latlngs = layer.getLatLngs();
@@ -146,7 +135,6 @@ export class MapDialogComponent implements OnInit {
         filterCoordinates.push(pathInfo);
       }
     });
-    // console.log(filterCoordinates);
     this._dialogRef.close(filterCoordinates);
   }
 }
