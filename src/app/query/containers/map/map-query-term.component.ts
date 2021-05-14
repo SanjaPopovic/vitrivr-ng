@@ -7,6 +7,7 @@ import {SemanticSketchDialogComponent} from '../semantic/semantic-sketch-dialog.
 import {first} from 'rxjs/operators';
 import {MapDialogComponent} from './map-dialog.component';
 import {Tag} from '../../../../../openapi/cineast';
+import {Circle} from './circle';
 
 @Component({
   selector: 'app-qt-map',
@@ -20,6 +21,7 @@ export class MapQueryTermComponent implements OnInit {
   @ViewChild('map', {static: true})
   private map;
   @Output() mapState = [];
+  private circles: Circle[] = [];
 
   // Instruction to create map is taken from https://www.digitalocean.com/community/tutorials/angular-angular-and-leaflet
   private initMap(): void {
@@ -99,8 +101,21 @@ export class MapQueryTermComponent implements OnInit {
    * @param String The Region that should be added.
    */
   public addRegion() {
-    this.mapTerm.data = 'data:application/json;base64,' + btoa(JSON.stringify(this.mapState.map(v => {
+    console.log(this.mapState);
+    for (const elem of this.mapState) {
+      if (elem[0].match('circle') != null) { // if it is a circle, and not a path
+        const circle: Circle = {
+          type: 'circle',
+          lat: elem[2],
+          lon: elem[1],
+          rad: elem[3]
+        }
+        this.circles.push(circle);
+      }
+    }
+    this.mapTerm.data = 'data:application/json;base64,' + btoa(JSON.stringify(this.circles.map(v => {
       return v;
     })));
+    console.log(this.circles);
   }
 }
