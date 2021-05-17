@@ -102,6 +102,7 @@ export class MapQueryTermComponent implements OnInit {
    */
   public addRegion() {
     console.log(this.mapState);
+    this.circles = [] as Circle[];
     for (const elem of this.mapState) {
       if (elem[0].match('circle') != null) { // if it is a circle, and not a path
         const circle: Circle = {
