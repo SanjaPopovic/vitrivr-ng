@@ -66,11 +66,11 @@ export class MapQueryTermComponent implements OnInit {
           circle.addTo(this.map);
           items.push(circle)
         } else if (elem[0].match('path') != null) {
-          const latlngs = [...elem];
+          /*const latlngs = [...elem];
           latlngs.shift(); // remove first element which is the indicator 'path'
           const polyline = L.polyline(latlngs, {color: 'red'});
           polyline.addTo(this.map);
-          items.push(polyline);
+          items.push(polyline);*/
         }
       }
     }

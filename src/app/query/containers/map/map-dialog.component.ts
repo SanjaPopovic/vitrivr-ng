@@ -41,11 +41,11 @@ export class MapDialogComponent implements OnInit {
         circle.addTo(this.popUpMap);
         items.push(circle)
       } else if (elem[0].match('path') != null) {
-        const latlngs = [...elem];
+        /*const latlngs = [...elem];
         latlngs.shift(); // remove first element which is the indicator 'path'
         const polyline = L.polyline(latlngs, {color: 'red'});
         polyline.addTo(this.popUpMap);
-        items.push(polyline);
+        items.push(polyline);*/
       }
     }
 
@@ -56,13 +56,7 @@ export class MapDialogComponent implements OnInit {
 
     const drawControl = new L.Control.Draw({
       draw: {
-        polyline: {
-          shapeOptions: {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0
-          }
-        },
+        polyline: false,
         polygon: false,
         circlemarker: false,
         rectangle: false,
@@ -126,13 +120,13 @@ export class MapDialogComponent implements OnInit {
       if (layer instanceof L.Circle) {
         filterCoordinates.push(['circle', layer.getLatLng().lng, layer.getLatLng().lat, layer.getRadius()]);
       } else if (layer instanceof L.Path) {
-        const pathInfo = []; // pathInfo = ['path', [lat, lon], [lat, lon]]
+        /*const pathInfo = []; // pathInfo = ['path', [lat, lon], [lat, lon]]
         pathInfo.push('path');
         const latlngs = layer.getLatLngs();
         for (let i = 0; i < latlngs.length; i++) {
           pathInfo.push([latlngs[i].lat, latlngs[i].lng])
         }
-        filterCoordinates.push(pathInfo);
+        filterCoordinates.push(pathInfo);*/
       }
     });
     this._dialogRef.close(filterCoordinates);
