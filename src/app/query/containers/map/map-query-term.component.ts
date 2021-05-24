@@ -20,8 +20,7 @@ export class MapQueryTermComponent implements OnInit {
   private mapTerm: MapQueryTerm;
   @ViewChild('map', {static: true})
   private map;
-  @Output() mapState = [];
-  private circles: Circle[] = [];
+  @Output() mapState: Circle[] = [];
 
   // Instruction to create map is taken from https://www.digitalocean.com/community/tutorials/angular-angular-and-leaflet
   private initMap(): void {
@@ -46,34 +45,27 @@ export class MapQueryTermComponent implements OnInit {
     this.initMap();
   }
 
-  public updateMap() {
+  public updateMap(result: Circle[]) {
     this.map.eachLayer((layer) => {
       if (!(layer instanceof L.TileLayer)) {
         layer.remove();
       }
     });
-    if (this.mapState.length > 0) {
-      const items = [];
-
-      for (const elem of this.mapState) {
-        if (elem[0].match('circle') != null) {
-          const colorOptions = {
-            color: 'red',
-            fillColor: '#f03',
-            fillOpacity: 0
-          }
-          const circle = L.circle([elem[2], elem[1]], elem[3], colorOptions);
-          circle.addTo(this.map);
-          items.push(circle)
-        } else if (elem[0].match('path') != null) {
-          /*const latlngs = [...elem];
-          latlngs.shift(); // remove first element which is the indicator 'path'
-          const polyline = L.polyline(latlngs, {color: 'red'});
-          polyline.addTo(this.map);
-          items.push(polyline);*/
-        }
-      }
+    this.mapState.length = 0;
+    const colorOptions = {
+      color: 'red',
+      fillColor: '#f03',
+      fillOpacity: 0
     }
+    result.forEach( (res) => {
+      if (res.type === 'circle') { // other case when res[0]==='info'. This comes from MapTag
+        const circle = L.circle([res.lat, res.lon], res.rad, colorOptions);
+        circle.addTo(this.map);
+        this.mapState.push(res);
+      } else if (res[0] === 'info') {
+        // draw MARKER!
+      }
+    });
   }
 
   /**
@@ -83,40 +75,19 @@ export class MapQueryTermComponent implements OnInit {
   public onViewerClicked() {
     const dialogRef = this._dialog.open(MapDialogComponent, {data: {mapState: this.mapState}});
     dialogRef.afterClosed().subscribe(result => {
-      if (this.mapState.length > 0 && result.length === 0) { // delete everything on mini map
-        this.mapState = [];
-        this.updateMap();
-        this.addRegion();
-      } else if (result.length !== 0 && JSON.stringify(result) !== JSON.stringify(this.mapState)) {
-        this.mapState = result;
-        this.updateMap();
-        this.addRegion();
-      }
+      this.updateMap(result);
+      this.addRegion();
     });
   }
 
   /**
-   * Add the specified region (at the moment: circle or path) to the list of regions. Take info from variable mapState.
+   * Add the specified region (circle) to the list of regions. Take info from variable mapState.
    * Removing a region also happens here.
    * @param String The Region that should be added.
    */
   public addRegion() {
-    console.log(this.mapState);
-    this.circles = [] as Circle[];
-    for (const elem of this.mapState) {
-      if (elem[0].match('circle') != null) { // if it is a circle, and not a path
-        const circle: Circle = {
-          type: 'circle',
-          lat: elem[2],
-          lon: elem[1],
-          rad: elem[3]
-        }
-        this.circles.push(circle);
-      }
-    }
-    this.mapTerm.data = 'data:application/json;base64,' + btoa(JSON.stringify(this.circles.map(v => {
+    this.mapTerm.data = 'data:application/json;base64,' + btoa(JSON.stringify(this.mapState.map(v => {
       return v;
     })));
-    console.log(this.circles);
   }
 }

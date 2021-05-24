@@ -5,5 +5,6 @@ export interface Circle {
   lat: number;
   lon: number;
   rad: number;
+  semantic_name: string;
 }
 

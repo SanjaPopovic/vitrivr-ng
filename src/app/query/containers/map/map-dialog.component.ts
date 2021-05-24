@@ -3,6 +3,8 @@ import * as L from 'leaflet';
 import {MAT_DIALOG_DATA, MatDialog, MatDialogConfig, MatDialogRef} from '@angular/material/dialog';
 import 'leaflet-draw/dist/leaflet.draw';
 import {MapQueryTermComponent} from './map-query-term.component';
+import {MatSnackBar} from '@angular/material/snack-bar';
+import {Circle} from './circle';
 
 
 
@@ -13,7 +15,7 @@ import {MapQueryTermComponent} from './map-query-term.component';
 })
 export class MapDialogComponent implements OnInit {
   private popUpMap;
-  private mapState;
+  private mapState: Circle[] = [];
   locations = [];
   private initMap(): void {
     this.popUpMap = L.map('popUpMap', {
@@ -30,24 +32,20 @@ export class MapDialogComponent implements OnInit {
     // update to previous map state regarding circles
     const items = [];
     this.mapState = this.data.mapState;
-    for (const elem of this.mapState) {
-      if (elem[0].match('circle') != null) {
-        const colorOptions = {
-          color: 'red',
-          fillColor: '#f03',
-          fillOpacity: 0
-        }
-        const circle = L.circle([elem[2], elem[1]], elem[3], colorOptions);
-        circle.addTo(this.popUpMap);
-        items.push(circle)
-      } else if (elem[0].match('path') != null) {
-        /*const latlngs = [...elem];
-        latlngs.shift(); // remove first element which is the indicator 'path'
-        const polyline = L.polyline(latlngs, {color: 'red'});
-        polyline.addTo(this.popUpMap);
-        items.push(polyline);*/
-      }
+    const colorOptions = {
+      color: 'red',
+      fillColor: '#f03',
+      fillOpacity: 0
     }
+    this.mapState.forEach((circle) => {
+      if (circle.type === 'circle') {
+        const newCircle = L.circle([circle.lat, circle.lon], circle.rad, colorOptions);
+        newCircle.addTo(this.popUpMap);
+        items.push(newCircle);
+      } else if (circle.type === 'info') {
+        // draw MARKER!
+      }
+    });
 
     tiles.addTo(this.popUpMap);
 
@@ -97,7 +95,8 @@ export class MapDialogComponent implements OnInit {
 
   }
 
-  constructor(private _dialog: MatDialog, private _dialogRef: MatDialogRef<MapDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: {mapState: []}) { }
+  constructor(private _dialog: MatDialog, private _matsnackbar: MatSnackBar, private _dialogRef: MatDialogRef<MapDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: { mapState: Circle[] }) {
+  }
 
   ngOnInit(): void {
     this.initMap();
@@ -115,20 +114,21 @@ export class MapDialogComponent implements OnInit {
    * Closes the dialog.
    */
   public close() {
-    const filterCoordinates = [];
+    const filterCoordinates: Circle[] = [];
     this.popUpMap.eachLayer(function (layer) {
       if (layer instanceof L.Circle) {
-        filterCoordinates.push(['circle', layer.getLatLng().lng, layer.getLatLng().lat, layer.getRadius()]);
-      } else if (layer instanceof L.Path) {
-        /*const pathInfo = []; // pathInfo = ['path', [lat, lon], [lat, lon]]
-        pathInfo.push('path');
-        const latlngs = layer.getLatLngs();
-        for (let i = 0; i < latlngs.length; i++) {
-          pathInfo.push([latlngs[i].lat, latlngs[i].lng])
+        console.log('check layer');
+        const circle: Circle = {
+          type: 'circle',
+          semantic_name: '',
+          lon: layer.getLatLng().lng,
+          lat: layer.getLatLng().lat,
+          rad: layer.getRadius(),
         }
-        filterCoordinates.push(pathInfo);*/
+        filterCoordinates.push(circle);
       }
     });
+    console.log(filterCoordinates);
     this._dialogRef.close(filterCoordinates);
   }
 }
