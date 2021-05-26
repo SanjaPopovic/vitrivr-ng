@@ -7,13 +7,11 @@
     "host_objects": "http://10.34.58.87/objects/:n/:S.jpg"
   },
   "competition": {
-    "teamid": 2,
-    "toolid": 1,
-    "endpoint": "http://10.34.58.45:9000",
+    "host": "dmi-dres.dmi.unibas.ch:443",
+    "tls": true,
     "log": false,
     "lsc": false,
-    "vbs": false,
-    "dres": false
+    "vbs": false
   },
   "mlt": {
     "VIDEO": ["scenecaption", "localfeatures", "objectInstances"],
@@ -34,9 +32,20 @@
     },
     "text": {
       "categories": [
+<<<<<<< HEAD
         ["ocr", "Text on Screen"],
         ["asr", "Audio"],
         ["scenecaption", "Description"]
+=======
+        [
+          "ocr",
+          "Text on Screen"
+        ],
+        [
+          "asr",
+          "Audio"
+        ]
+>>>>>>> 24076cff54f5d6c694f6d352debef51e4c78fa7a
       ]
     },
     "boolean": [

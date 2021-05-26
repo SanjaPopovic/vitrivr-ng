@@ -81,7 +81,7 @@
             "tsConfig": "src/tsconfig.spec.json",
             "scripts": [],
             "styles": [
-              "src/vitrivr-theme.css",
+              "src/vitrivr-theme.css"
             ],
             "assets": [
               "src/assets",
@@ -136,5 +136,8 @@
     "@schematics/angular:directive": {
       "prefix": "app"
     }
+  },
+  "cli": {
+    "analytics": "2970625d-f498-4082-9b68-fd5c962678f4"
   }
 }
