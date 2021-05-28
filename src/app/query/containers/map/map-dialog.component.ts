@@ -5,7 +5,9 @@ import 'leaflet-draw/dist/leaflet.draw';
 import {MapQueryTermComponent} from './map-query-term.component';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {Circle} from './circle';
-
+import {MapLookupService} from '../../../core/lookup/map-lookup.service';
+import {SelectResult, TagService} from '../../../../../openapi/cineast';
+import { Observable } from 'rxjs';
 
 
 @Component({
@@ -95,7 +97,7 @@ export class MapDialogComponent implements OnInit {
 
   }
 
-  constructor(private _dialog: MatDialog, private _matsnackbar: MatSnackBar, private _dialogRef: MatDialogRef<MapDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: { mapState: Circle[] }) {
+  constructor(private _mapService: MapLookupService, private _dialog: MatDialog, private _matsnackbar: MatSnackBar, private _dialogRef: MatDialogRef<MapDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: { mapState: Circle[] }) {
   }
 
   ngOnInit(): void {
@@ -104,6 +106,8 @@ export class MapDialogComponent implements OnInit {
 
   public addLocation() {
     this.locations.push({location: ''}); // new word
+    const columns: Observable<SelectResult> = this._mapService.getDistinctLocations()
+    console.log(columns.forEach(value => {console.log(value.columns)}));
   }
 
   public removeLocation(i) {
