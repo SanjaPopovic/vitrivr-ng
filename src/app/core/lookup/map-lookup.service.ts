@@ -1,7 +1,7 @@
 import {Inject, Injectable} from '@angular/core';
 import {Observable, BehaviorSubject} from 'rxjs';
 import {first} from 'rxjs/operators';
-import {MiscService} from '../../../../openapi/cineast';
+import {MiscService, SelectResult} from '../../../../openapi/cineast';
 import {SelectSpecification} from '../../../../openapi/cineast';
 
 /**
@@ -18,7 +18,7 @@ export class MapLookupService {
   /**
    * Returns all visited locations in lifelog (LSC).
    */
-  public getDistinctLocations() {
+  public getDistinctLocations(): Observable<SelectResult> {
     const sp: SelectSpecification = {
       table: 'cineast_distinctlocations',
       columns: ['semantic_name', 'lat', 'lon', 'freq']

@@ -2,9 +2,9 @@
 
 export interface Circle {
   type: string;
-  lat: number;
-  lon: number;
-  rad: number;
+  lat?: number;
+  lon?: number;
+  rad?: number;
   semantic_name: string;
 }
 

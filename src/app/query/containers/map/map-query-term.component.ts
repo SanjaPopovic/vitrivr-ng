@@ -62,8 +62,12 @@ export class MapQueryTermComponent implements OnInit {
         const circle = L.circle([res.lat, res.lon], res.rad, colorOptions);
         circle.addTo(this.map);
         this.mapState.push(res);
-      } else if (res[0] === 'info') {
+      } else if (res.type === 'info') {
         // draw MARKER!
+        // const circle = L.circle([res.lat, res.lon], res.rad, colorOptions);
+        const marker = L.marker([res.lat, res.lon], colorOptions);
+        marker.addTo(this.map);
+        this.mapState.push(res);
       }
     });
   }
