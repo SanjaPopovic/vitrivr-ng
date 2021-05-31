@@ -11,8 +11,16 @@ import {EMPTY, Observable} from 'rxjs';
 import {FormControl} from '@angular/forms';
 import {debounceTime, first, map, mergeAll, startWith} from 'rxjs/operators';
 import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
-
-
+const iconRetinaUrl = './assets/marker-icon-2x.png';
+const iconUrl = './assets/marker-icon.png';
+const shadowUrl = './assets/marker-shadow.png';
+const iconDefault = L.icon({iconRetinaUrl, iconUrl, shadowUrl,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  tooltipAnchor: [16, -28],
+  shadowSize: [41, 41]});
+L.Marker.prototype.options.icon = iconDefault;
 @Component({
   selector: 'app-qt-map-dialog',
   templateUrl: 'map-dialog.component.html',
@@ -20,8 +28,13 @@ import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
 })
 export class MapDialogComponent implements OnInit {
   private popUpMap;
+  // Save both: drawn circle and entered tag-like locations.
+  // Both will be saved as Circle-Objects.
+  // How to distinguish them: circle.type = 'info' and circle.type = 'circle'
   private mapState: Circle[] = [];
-  locations = [];
+  private markers: Circle[] = [];
+  private drawnCircles: Circle[] = [];
+
   /** List of tag fields currently displayed. */
   private readonly _field: FieldGroup;
 
@@ -39,22 +52,24 @@ export class MapDialogComponent implements OnInit {
 
     // update to previous map state regarding circles
     const items = [];
-    this.mapState = this.data.mapState;
+    // this.mapState = this.data.mapState;
     const colorOptions = {
       color: 'red',
       fillColor: '#f03',
       fillOpacity: 0
     }
-    this.mapState.forEach((circle) => {
+    this.data.mapState.forEach((circle) => {
       if (circle.type === 'circle') {
         const newCircle = L.circle([circle.lat, circle.lon], circle.rad, colorOptions);
         newCircle.addTo(this.popUpMap);
         items.push(newCircle);
       } else if (circle.type === 'info') {
-        // draw MARKER!
-        const marker = L.marker([circle.lat, circle.lon], colorOptions);
-        marker.addTo(this.popUpMap);
+        console.log('IN INIT MAP popup')
+        // draw Marker!
+        const marker = L.marker([ circle.lat, circle.lon ]);
+        marker.addTo(this.popUpMap).bindPopup('Hello');
         items.push(marker);
+        this.markers.push(circle);
       }
     });
 
@@ -97,15 +112,36 @@ export class MapDialogComponent implements OnInit {
         // console.log('ITS A CIRCLE')
         // filterCoordinates.push(['circle', layer.getLatLng(), layer.getRadius()]);
         // console.log(filterCoordinates);
-      } else if (layer instanceof L.Path) {
-        // console.log('ITS A PATH')
       }
-
     });
-
-
   }
 
+  public updateMap() {
+    this.popUpMap.eachLayer((layer) => {
+      if (!(layer instanceof L.TileLayer)) {
+        layer.remove();
+      }
+    });
+    const colorOptions = {
+      color: 'red',
+      fillColor: '#f03',
+      fillOpacity: 0
+    }
+    this.mapState = this.markers.concat(this.drawnCircles);
+    this.mapState.forEach( (res) => {
+      if (res.type === 'circle') { // other case when res[0]==='info'. This comes from MapTag
+        const circle = L.circle([res.lat, res.lon], res.rad, colorOptions);
+        circle.addTo(this.popUpMap);
+      } else if (res.type === 'info') {
+        // draw MARKER!
+        // const circle = L.circle([res.lat, res.lon], res.rad, colorOptions);
+        const marker = L.marker([res.lat, res.lon], colorOptions);
+        marker.addTo(this.popUpMap);
+      }
+    });
+  }
+
+  // tslint:disable-next-line:max-line-length
   constructor(private _mapService: MapLookupService, private _dialog: MatDialog, private _matsnackbar: MatSnackBar, private _dialogRef: MatDialogRef<MapDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: { mapState: Circle[] }) {
     this._field = new FieldGroup(_mapService);
   }
@@ -113,12 +149,6 @@ export class MapDialogComponent implements OnInit {
   ngOnInit(): void {
     this.initMap();
   }
-
-/*  public addLocation() {
-    this.locations.push({location: ''}); // new word
-    const columns: Observable<SelectResult> = this._mapService.getDistinctLocations();
-    console.log(columns.forEach(value => {console.log(value.columns)}));
-  }*/
 
 /*  public removeLocation(i) {
     this.locations.splice(i, 1);
@@ -131,27 +161,17 @@ export class MapDialogComponent implements OnInit {
     const filterCoordinates: Circle[] = [];
     this.popUpMap.eachLayer(function (layer) {
       if (layer instanceof L.Circle) {
-        console.log('check layer');
         const circle: Circle = {
           type: 'circle',
           semantic_name: '',
           lon: layer.getLatLng().lng,
           lat: layer.getLatLng().lat,
-          rad: layer.getRadius(),
+          rad: layer.getRadius()
         }
         filterCoordinates.push(circle);
-      } else if (layer instanceof L.marker) {
-        const circle: Circle = {
-          type: 'info',
-          semantic_name: '',
-          lon: layer.getLatLng().lng,
-          lat: layer.getLatLng().lat,
-          rad: layer.getRadius(),
-        }
-      }
-    });
-    console.log(filterCoordinates);
-    this._dialogRef.close(filterCoordinates);
+      }});
+    this.mapState = filterCoordinates.concat(this.markers); // markers + drawn circles
+    this._dialogRef.close(this.mapState);
   }
 
   get field() {
@@ -166,6 +186,8 @@ export class MapDialogComponent implements OnInit {
   public onLocationSelected(event: MatAutocompleteSelectedEvent) {
     let locationAlreadyInList = false;
     for (const existing of this.mapState) {
+      // event.option.value is one chosen dictionary in autocomplete list.
+      // Here, we choose by indicating key, we get the value such as work, home, Dublin etc.
       if (existing.semantic_name === event.option.value['semantic_name']) {
         locationAlreadyInList = true;
       }
@@ -194,10 +216,13 @@ export class MapDialogComponent implements OnInit {
    */
   public addLocation(location: Circle) {
     // this.mapState.push(circle);
-    this.locations.push(location); // push ob
-    this.mapState.push(location);
+    // this.locations.push(location); // maybe not needed in the end
+    this.markers.push(location);
+    this.updateMap();
     this.field.formControl.setValue('');
-    console.log(this.locations);
+    // console.log(this.locations);
+    // console.log(this._field.filteredLocations);
+    // console.log(this._field.currentlyDisplayedLocations);
   }
 
 /*  /!**
@@ -238,10 +263,7 @@ export class FieldGroup {
       startWith(''),
       map((location: string) => {
         if (location.length >= 3) {
-          // const temp: Observable<string[]> = new Observable<string[]>();
-          return this._locations.getDistinctLocations().pipe(first()).map(res => res.columns) // .pipe(first()).map(r => r.map((dict) => temp.push(dict['semantic_name'])));
-          // console.log(temp); // this._locations.getDistinctLocations().pipe(first()).map(res => res.columns[0]['semantic_name']))
-          // return temp; // .map(res => res.columns); // .pipe().map(r => r.forEach((dict) => {dict}));
+          return this._locations.getDistinctLocations().pipe(first()).map(res => res.columns)
         } else {
           return EMPTY;
         }
@@ -251,7 +273,6 @@ export class FieldGroup {
     this.filteredLocations.subscribe(value => {
       this.currentlyDisplayedLocations = new Array<string>();
       value.forEach(t => this.currentlyDisplayedLocations.push(t['semantic_name']));
-      // console.log(this.currentlyDisplayedLocations);
     });
   }
 
