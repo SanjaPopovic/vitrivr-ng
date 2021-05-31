@@ -67,7 +67,7 @@ export class MapDialogComponent implements OnInit {
         console.log('IN INIT MAP popup')
         // draw Marker!
         const marker = L.marker([ circle.lat, circle.lon ]);
-        marker.addTo(this.popUpMap).bindPopup('Hello');
+        marker.addTo(this.popUpMap).bindPopup(circle.semantic_name);
         items.push(marker);
         this.markers.push(circle);
       }
@@ -136,6 +136,7 @@ export class MapDialogComponent implements OnInit {
         // draw MARKER!
         // const circle = L.circle([res.lat, res.lon], res.rad, colorOptions);
         const marker = L.marker([res.lat, res.lon], colorOptions);
+        marker.addTo(this.popUpMap).bindPopup(res.semantic_name);
         marker.addTo(this.popUpMap);
       }
     });
