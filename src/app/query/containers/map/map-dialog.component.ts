@@ -41,7 +41,7 @@ export class MapDialogComponent implements OnInit {
   private initMap(): void {
     this.popUpMap = L.map('popUpMap', {
       center: [ 47.5595986, 7.5885761 ],
-      zoom: 8
+      zoom: 5
     });
 
     const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -99,7 +99,7 @@ export class MapDialogComponent implements OnInit {
       }
     });
     this.popUpMap.addControl(drawControl);
-
+    const _this = this;
     this.popUpMap.on('draw:created', function (e) {
       const type = e.layerType,
         layer = e.layer;
@@ -111,6 +111,7 @@ export class MapDialogComponent implements OnInit {
         // console.log('ITS A CIRCLE')
         // filterCoordinates.push(['circle', layer.getLatLng(), layer.getRadius()]);
         // console.log(filterCoordinates);
+        _this.updateMap();
       }
     });
   }
@@ -139,6 +140,7 @@ export class MapDialogComponent implements OnInit {
       fillColor: '#f03',
       fillOpacity: 0
     }
+    this.mapState.length = 0;
     this.mapState = this.markers.concat(this.drawnCircles);
     this.mapState.forEach( (res) => {
       if (res.type === 'circle') { // other case when res[0]==='info'. This comes from MapTag
@@ -149,7 +151,6 @@ export class MapDialogComponent implements OnInit {
         // const circle = L.circle([res.lat, res.lon], res.rad, colorOptions);
         const marker = L.marker([res.lat, res.lon], colorOptions);
         marker.addTo(this.popUpMap).bindPopup(res.semantic_name);
-        marker.addTo(this.popUpMap);
       }
     });
   }

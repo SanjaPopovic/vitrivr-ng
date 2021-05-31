@@ -26,7 +26,7 @@ export class MapQueryTermComponent implements OnInit {
   private initMap(): void {
     this.map = L.map('map', {
       center: [ 47.5595986, 7.5885761 ],
-      zoom: 8
+      zoom: 3
     });
 
     const tiles = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
