@@ -77,12 +77,12 @@ export class MapQueryTermComponent implements OnInit {
    * it should be edited; opens the MapDialogComponent
    */
   public onViewerClicked() {
-    console.log(this.mapState);
     const dialogRef = this._dialog.open(MapDialogComponent, {data: {mapState: this.mapState}});
     dialogRef.afterClosed().subscribe(result => {
-      console.log(result);
-      this.updateMap(result);
-      this.addRegion();
+      if (result) {
+        this.updateMap(result);
+        this.addRegion();
+      }
     });
   }
 

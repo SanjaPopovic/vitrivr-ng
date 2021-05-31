@@ -64,7 +64,6 @@ export class MapDialogComponent implements OnInit {
         newCircle.addTo(this.popUpMap);
         items.push(newCircle);
       } else if (circle.type === 'info') {
-        console.log('IN INIT MAP popup')
         // draw Marker!
         const marker = L.marker([ circle.lat, circle.lon ]);
         marker.addTo(this.popUpMap).bindPopup(circle.semantic_name);
@@ -117,6 +116,19 @@ export class MapDialogComponent implements OnInit {
   }
 
   public updateMap() {
+    this.drawnCircles = [];
+    this.popUpMap.eachLayer((layer) => {
+      if (layer instanceof L.Circle) {
+        const circle: Circle = {
+          type: 'circle',
+          semantic_name: '',
+          lon: layer.getLatLng().lng,
+          lat: layer.getLatLng().lat,
+          rad: layer.getRadius()
+        }
+        this.drawnCircles.push(circle);
+      }
+    });
     this.popUpMap.eachLayer((layer) => {
       if (!(layer instanceof L.TileLayer)) {
         layer.remove();
@@ -216,14 +228,9 @@ export class MapDialogComponent implements OnInit {
    * @param {Tag} tag The tag that should be added.
    */
   public addLocation(location: Circle) {
-    // this.mapState.push(circle);
-    // this.locations.push(location); // maybe not needed in the end
     this.markers.push(location);
     this.updateMap();
     this.field.formControl.setValue('');
-    // console.log(this.locations);
-    // console.log(this._field.filteredLocations);
-    // console.log(this._field.currentlyDisplayedLocations);
   }
 
 /*  /!**
