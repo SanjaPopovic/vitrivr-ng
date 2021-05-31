@@ -35,6 +35,7 @@ export class MapDialogComponent implements OnInit {
   private markers: Circle[] = [];
   private drawnCircles: Circle[] = [];
 
+  private drawnItems;
   /** List of tag fields currently displayed. */
   private readonly _field: FieldGroup;
 
@@ -50,9 +51,7 @@ export class MapDialogComponent implements OnInit {
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     });
 
-    // update to previous map state regarding circles
     const items = [];
-    // this.mapState = this.data.mapState;
     const colorOptions = {
       color: 'red',
       fillColor: '#f03',
@@ -74,8 +73,8 @@ export class MapDialogComponent implements OnInit {
 
     tiles.addTo(this.popUpMap);
 
-    const drawnItems = new L.FeatureGroup(items);
-    this.popUpMap.addLayer(drawnItems);
+    this.drawnItems = new L.FeatureGroup(items);
+    this.popUpMap.addLayer(this.drawnItems);
 
     const drawControl = new L.Control.Draw({
       draw: {
@@ -94,31 +93,19 @@ export class MapDialogComponent implements OnInit {
         }
       },
       edit: {
-        featureGroup: drawnItems, // tell which layer is editable
+        featureGroup: this.drawnItems, // tell which layer is editable
         edit: false
       }
     });
+    const __this = this.drawnItems;
     this.popUpMap.addControl(drawControl);
     const _this = this;
     this.popUpMap.on('draw:created', function (e) {
       const type = e.layerType,
         layer = e.layer;
-      // if (type === 'rectangle') {layer.bindPopup('A rectangle!'); }
-      drawnItems.addLayer(layer);
 
-      // console.log (drawnItems.getLayers()); // each layer has one circle or path
-      if (layer instanceof L.Circle) {
-        // console.log('ITS A CIRCLE')
-        // filterCoordinates.push(['circle', layer.getLatLng(), layer.getRadius()]);
-        // console.log(filterCoordinates);
-        _this.updateMap();
-      }
-    });
-  }
+      __this.addLayer(layer);
 
-  public updateMap() {
-    this.drawnCircles = [];
-    this.popUpMap.eachLayer((layer) => {
       if (layer instanceof L.Circle) {
         const circle: Circle = {
           type: 'circle',
@@ -127,32 +114,24 @@ export class MapDialogComponent implements OnInit {
           lat: layer.getLatLng().lat,
           rad: layer.getRadius()
         }
-        this.drawnCircles.push(circle);
+        _this.updateDrawnCircles(circle);
       }
     });
-    this.popUpMap.eachLayer((layer) => {
-      if (!(layer instanceof L.TileLayer)) {
-        layer.remove();
-      }
-    });
+  }
+
+  public updateDrawnCircles(circle: Circle) {
+    this.drawnCircles.push(circle);
+  }
+
+  public updateMarkers(marker: Circle) {
     const colorOptions = {
       color: 'red',
       fillColor: '#f03',
       fillOpacity: 0
     }
-    this.mapState.length = 0;
-    this.mapState = this.markers.concat(this.drawnCircles);
-    this.mapState.forEach( (res) => {
-      if (res.type === 'circle') { // other case when res[0]==='info'. This comes from MapTag
-        const circle = L.circle([res.lat, res.lon], res.rad, colorOptions);
-        circle.addTo(this.popUpMap);
-      } else if (res.type === 'info') {
-        // draw MARKER!
-        // const circle = L.circle([res.lat, res.lon], res.rad, colorOptions);
-        const marker = L.marker([res.lat, res.lon], colorOptions);
-        marker.addTo(this.popUpMap).bindPopup(res.semantic_name);
-      }
-    });
+    const markerInPopUp = L.marker([marker.lat, marker.lon], colorOptions);
+    markerInPopUp.addTo(this.popUpMap).bindPopup(marker.semantic_name);
+    this.drawnItems.addLayer(markerInPopUp);
   }
 
   // tslint:disable-next-line:max-line-length
@@ -185,6 +164,10 @@ export class MapDialogComponent implements OnInit {
         filterCoordinates.push(circle);
       }});
     this.mapState = filterCoordinates.concat(this.markers); // markers + drawn circles
+    console.log('mapState right before closing popup');
+    this.mapState.forEach(elem => {
+      console.log(elem.type);
+    });
     this._dialogRef.close(this.mapState);
   }
 
@@ -230,7 +213,7 @@ export class MapDialogComponent implements OnInit {
    */
   public addLocation(location: Circle) {
     this.markers.push(location);
-    this.updateMap();
+    this.updateMarkers(location);
     this.field.formControl.setValue('');
   }
 
