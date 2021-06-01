@@ -34,6 +34,7 @@ export class MapDialogComponent implements OnInit {
   private mapState: Circle[] = [];
   private markers: Circle[] = [];
   private drawnCircles: Circle[] = [];
+  private test_markers: Array<{ [semantic_name: string]: [Circle, L.marker]; }>;
 
   private drawnItems;
   /** List of tag fields currently displayed. */
@@ -57,6 +58,7 @@ export class MapDialogComponent implements OnInit {
       fillColor: '#f03',
       fillOpacity: 0
     }
+    this.test_markers = Array<{ [semantic_name: string]: [Circle, L.marker]; }>();
     this.data.mapState.forEach((circle) => {
       if (circle.type === 'circle') {
         const newCircle = L.circle([circle.lat, circle.lon], circle.rad, colorOptions);
@@ -68,6 +70,9 @@ export class MapDialogComponent implements OnInit {
         marker.addTo(this.popUpMap).bindPopup(circle.semantic_name);
         items.push(marker);
         this.markers.push(circle);
+        const tempDict = {} // save <circle-object and corresponding marker in map>
+        tempDict[circle.semantic_name] = [circle, marker];
+        this.test_markers.push(tempDict);
       }
     });
 
@@ -132,11 +137,24 @@ export class MapDialogComponent implements OnInit {
     const markerInPopUp = L.marker([marker.lat, marker.lon], colorOptions);
     markerInPopUp.addTo(this.popUpMap).bindPopup(marker.semantic_name);
     this.drawnItems.addLayer(markerInPopUp);
+
+    const tempDict = {} // save <circle-object and corresponding marker in map>
+    tempDict[marker.semantic_name] = [marker, markerInPopUp];
+    this.test_markers.push(tempDict);
+    console.log('this.test_markers + ' + this.test_markers);
   }
 
   // tslint:disable-next-line:max-line-length
   constructor(private _mapService: MapLookupService, private _dialog: MatDialog, private _matsnackbar: MatSnackBar, private _dialogRef: MatDialogRef<MapDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: { mapState: Circle[] }) {
     this._field = new FieldGroup(_mapService);
+  }
+
+  public deleteMarker(marker: Circle) {
+    console.log('In deleteMarker() + ' + marker.semantic_name);
+    if (this.test_markers.hasOwnProperty(marker.semantic_name)) {
+      this.popUpMap.removeLayer(this.test_markers[marker.semantic_name][1]);
+      delete this.test_markers[marker.semantic_name];
+    }
   }
 
   ngOnInit(): void {
@@ -163,10 +181,19 @@ export class MapDialogComponent implements OnInit {
         }
         filterCoordinates.push(circle);
       }});
-    this.mapState = filterCoordinates.concat(this.markers); // markers + drawn circles
+    const markersAsCircles = []
+    for (const key in this.test_markers) {
+      if (this.test_markers.hasOwnProperty(key)) {
+        const circleObj = this.test_markers[key][0];
+        markersAsCircles.push(circleObj);
+      }
+    }
+    this.mapState = filterCoordinates.concat(markersAsCircles); // markers + drawn circles
     console.log('mapState right before closing popup');
     this.mapState.forEach(elem => {
-      console.log(elem.type);
+      if (elem) {
+        console.log(elem.type);
+      }
     });
     this._dialogRef.close(this.mapState);
   }
@@ -217,21 +244,22 @@ export class MapDialogComponent implements OnInit {
     this.field.formControl.setValue('');
   }
 
-/*  /!**
+  /**
    * Removes the specified tag from the list of tags.
    *
    * @param {Tag} tag The tag that should be removed.
-   *!/
-  public removeTag(tag: Tag) {
-    const index = this._tags.indexOf(tag);
+   */
+  public removeLocation(location: Circle) {
+    const index = this.markers.indexOf(location);
     if (index > -1) {
-      this._tags.splice(index, 1);
+      this.markers.splice(index, 1);
+      this.deleteMarker(location);
     }
-    this.tagTerm.tags = this._tags;
-    this.tagTerm.data = 'data:application/json;base64,' + btoa(JSON.stringify(this._tags.map(v => {
-      return v;
-    })));
-  }*/
+  }
+
+  get taggedLocations() {
+    return this.markers;
+  }
 }
 
 
