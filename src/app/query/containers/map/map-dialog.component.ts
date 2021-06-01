@@ -186,13 +186,17 @@ export class MapDialogComponent implements OnInit {
         }
         filterCoordinates.push(circle);
       }});
+
     const markersAsCircles = []
-    for (const key in this.test_markers) {
-      if (this.test_markers.hasOwnProperty(key)) {
-        const circleObj = this.test_markers[key][0];
-        markersAsCircles.push(circleObj);
+
+    for (let i = this.test_markers.length - 1; i >= 0; i--) {
+      console.log('here');
+      if (Object.keys(this.test_markers[i]).length === 1) {
+        const key = Object.keys(this.test_markers[i]);
+        markersAsCircles.push(this.test_markers[i][key.toString()][0])
       }
     }
+
     this.mapState = filterCoordinates.concat(markersAsCircles); // markers + drawn circles
     console.log('mapState right before closing popup');
     this.mapState.forEach(elem => {
