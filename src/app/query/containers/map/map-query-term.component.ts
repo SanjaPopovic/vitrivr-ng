@@ -57,6 +57,7 @@ export class MapQueryTermComponent implements OnInit {
       fillColor: '#f03',
       fillOpacity: 0
     }
+    console.log('data that will go to cineast')
     result.forEach( (res) => {
       if (res.type === 'circle') { // other case when res[0]==='info'. This comes from MapTag
         const circle = L.circle([res.lat, res.lon], res.rad, colorOptions);
@@ -69,6 +70,7 @@ export class MapQueryTermComponent implements OnInit {
         marker.addTo(this.map);
         this.mapState.push(res);
       }
+      console.log(res);
     });
   }
 

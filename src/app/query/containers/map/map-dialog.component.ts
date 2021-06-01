@@ -121,6 +121,15 @@ export class MapDialogComponent implements OnInit {
         }
         _this.updateDrawnCircles(circle);
       }
+      _this.deleteMarker();
+    });
+    this.popUpMap.on('draw:deleted', function (e) {
+      const type = e.layerType,
+        layer = e.layer;
+
+      // __this.addLayer(layer);
+      console.log('DELETED')
+      _this.deleteMarker();
     });
   }
 
@@ -149,7 +158,10 @@ export class MapDialogComponent implements OnInit {
     this._field = new FieldGroup(_mapService);
   }
 
-  public deleteMarker(marker: Circle) {
+  public deleteMarker(marker?: Circle) {
+    if (typeof marker === 'undefined') {
+
+    } else {
     console.log('In deleteMarker() + ' + marker.semantic_name);
     // console.log(this.test_markers.hasOwnProperty('semantic_name'))
     for (let i = this.test_markers.length - 1; i >= 0; i--) {
@@ -159,6 +171,7 @@ export class MapDialogComponent implements OnInit {
         delete this.test_markers[marker.semantic_name];
         this.test_markers.splice(i, 1);
       }
+    }
     }
   }
 
@@ -218,10 +231,10 @@ export class MapDialogComponent implements OnInit {
    */
   public onLocationSelected(event: MatAutocompleteSelectedEvent) {
     let locationAlreadyInList = false;
-    for (const existing of this.mapState) {
+    for (const existing of this.test_markers) {
       // event.option.value is one chosen dictionary in autocomplete list.
       // Here, we choose by indicating key, we get the value such as work, home, Dublin etc.
-      if (existing.semantic_name === event.option.value['semantic_name']) {
+      if (existing.hasOwnProperty(event.option.value['semantic_name'])) {
         locationAlreadyInList = true;
       }
     }
