@@ -151,9 +151,14 @@ export class MapDialogComponent implements OnInit {
 
   public deleteMarker(marker: Circle) {
     console.log('In deleteMarker() + ' + marker.semantic_name);
-    if (this.test_markers.hasOwnProperty(marker.semantic_name)) {
-      this.popUpMap.removeLayer(this.test_markers[marker.semantic_name][1]);
-      delete this.test_markers[marker.semantic_name];
+    // console.log(this.test_markers.hasOwnProperty('semantic_name'))
+    for (let i = this.test_markers.length - 1; i >= 0; i--) {
+      if (this.test_markers[i].hasOwnProperty(marker.semantic_name)) {
+        console.log('here');
+        this.popUpMap.removeLayer(this.test_markers[i][marker.semantic_name][1]);
+        delete this.test_markers[marker.semantic_name];
+        this.test_markers.splice(i, 1);
+      }
     }
   }
 
