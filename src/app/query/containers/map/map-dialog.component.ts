@@ -304,8 +304,12 @@ export class FieldGroup {
       debounceTime(250),
       startWith(''),
       map((location: string) => {
-        if (location.length >= 3) {
-          return this._locations.getDistinctLocations().pipe(first()).map(res => res.columns.filter(row => row['semantic_name'].toLowerCase().includes(location.toLowerCase())));
+        if (location.length >= 2) {
+          return this._locations.getDistinctLocations().pipe(first()).map(res => res.columns.filter(row =>
+             location.toLowerCase().split(' ').every(r => row['semantic_name'].toLowerCase().split(' ').find(a => a.indexOf(r) > -1))
+              // row['semantic_name'].toLowerCase().split(' ').some(e => e.indexOf())
+            )
+          );
         } else {
           return EMPTY;
         }
