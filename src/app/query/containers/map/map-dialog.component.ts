@@ -305,7 +305,7 @@ export class FieldGroup {
       startWith(''),
       map((location: string) => {
         if (location.length >= 3) {
-          return this._locations.getDistinctLocations().pipe(first()).map(res => res.columns)
+          return this._locations.getDistinctLocations().pipe(first()).map(res => res.columns.filter(row => row['semantic_name'].toLowerCase().includes(location.toLowerCase())));
         } else {
           return EMPTY;
         }
