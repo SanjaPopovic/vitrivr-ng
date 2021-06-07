@@ -11,16 +11,20 @@ import {EMPTY, Observable} from 'rxjs';
 import {FormControl} from '@angular/forms';
 import {debounceTime, first, map, mergeAll, startWith} from 'rxjs/operators';
 import {MatAutocompleteSelectedEvent} from '@angular/material/autocomplete';
+
 const iconRetinaUrl = './assets/marker-icon-2x.png';
 const iconUrl = './assets/marker-icon.png';
 const shadowUrl = './assets/marker-shadow.png';
-const iconDefault = L.icon({iconRetinaUrl, iconUrl, shadowUrl,
+const iconDefault = L.icon({
+  iconRetinaUrl, iconUrl, shadowUrl,
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
   tooltipAnchor: [16, -28],
-  shadowSize: [41, 41]});
+  shadowSize: [41, 41]
+});
 L.Marker.prototype.options.icon = iconDefault;
+
 @Component({
   selector: 'app-qt-map-dialog',
   templateUrl: 'map-dialog.component.html',
@@ -42,7 +46,7 @@ export class MapDialogComponent implements OnInit {
 
   private initMap(): void {
     this.popUpMap = L.map('popUpMap', {
-      center: [ 47.5595986, 7.5885761 ],
+      center: [47.5595986, 7.5885761],
       zoom: 5
     });
 
@@ -58,6 +62,10 @@ export class MapDialogComponent implements OnInit {
       fillColor: '#f03',
       fillOpacity: 0
     }
+
+
+    tiles.addTo(this.popUpMap);
+
     this.test_markers = Array<{ [semantic_name: string]: [Circle, L.marker]; }>();
     this.data.mapState.forEach((circle) => {
       if (circle.type === 'circle') {
@@ -66,7 +74,8 @@ export class MapDialogComponent implements OnInit {
         items.push(newCircle);
       } else if (circle.type === 'info') {
         // draw Marker!
-        const marker = L.marker([ circle.lat, circle.lon ]);
+        const marker = L.marker([circle.lat, circle.lon]);
+        marker.id = circle.semantic_name;
         marker.addTo(this.popUpMap).bindPopup(circle.semantic_name);
         items.push(marker);
         this.markers.push(circle);
@@ -75,8 +84,6 @@ export class MapDialogComponent implements OnInit {
         this.test_markers.push(tempDict);
       }
     });
-
-    tiles.addTo(this.popUpMap);
 
     this.drawnItems = new L.FeatureGroup(items);
     this.popUpMap.addLayer(this.drawnItems);
@@ -121,12 +128,10 @@ export class MapDialogComponent implements OnInit {
         }
         _this.updateDrawnCircles(circle);
       }
-      _this.deleteMarker();
     });
     this.popUpMap.on('draw:deleted', function (e) {
       const type = e.layerType,
         layer = e.layer;
-
       // __this.addLayer(layer);
       console.log('DELETED')
       _this.deleteMarker();
@@ -160,18 +165,36 @@ export class MapDialogComponent implements OnInit {
 
   public deleteMarker(marker?: Circle) {
     if (typeof marker === 'undefined') {
-
-    } else {
-    console.log('In deleteMarker() + ' + marker.semantic_name);
-    // console.log(this.test_markers.hasOwnProperty('semantic_name'))
-    for (let i = this.test_markers.length - 1; i >= 0; i--) {
-      if (this.test_markers[i].hasOwnProperty(marker.semantic_name)) {
-        console.log('here');
-        this.popUpMap.removeLayer(this.test_markers[i][marker.semantic_name][1]);
-        delete this.test_markers[marker.semantic_name];
-        this.test_markers.splice(i, 1);
+      const _this = this;
+      const markers_on_map = [];
+      this.popUpMap.eachLayer(function(layer) {
+        if (layer instanceof L.Marker) {
+            markers_on_map.push(layer._popup._content);
+        }
+      });
+      for (let i = this.test_markers.length - 1; i >= 0; i--) {
+        let key = '';
+        for (key in this.test_markers[i]) { // get value of key, which is semantic_name
+        }
+        if (markers_on_map.indexOf(key) < 0 ) { // deleted in map -> delete in tags
+          const index = this.markers.indexOf(this.test_markers[i][key][0]);
+          if (index > -1) {
+            this.markers.splice(index, 1);
+          }
+          this.test_markers.splice(i, 1);
+        }
       }
-    }
+    } else {
+      console.log('In deleteMarker() + ' + marker.semantic_name);
+      // console.log(this.test_markers.hasOwnProperty('semantic_name'))
+      for (let i = this.test_markers.length - 1; i >= 0; i--) {
+        if (this.test_markers[i].hasOwnProperty(marker.semantic_name)) {
+          console.log('here');
+          this.popUpMap.removeLayer(this.test_markers[i][marker.semantic_name][1]);
+          delete this.test_markers[marker.semantic_name];
+          this.test_markers.splice(i, 1);
+        }
+      }
     }
   }
 
@@ -179,9 +202,9 @@ export class MapDialogComponent implements OnInit {
     this.initMap();
   }
 
-/*  public removeLocation(i) {
-    this.locations.splice(i, 1);
-  }*/
+  /*  public removeLocation(i) {
+      this.locations.splice(i, 1);
+    }*/
 
   /**
    * Closes the dialog.
@@ -198,7 +221,8 @@ export class MapDialogComponent implements OnInit {
           rad: layer.getRadius()
         }
         filterCoordinates.push(circle);
-      }});
+      }
+    });
 
     const markersAsCircles = []
 
@@ -276,6 +300,9 @@ export class MapDialogComponent implements OnInit {
     if (index > -1) {
       this.markers.splice(index, 1);
       this.deleteMarker(location);
+
+      // console.log(this.test_markers.hasOwnProperty(location.semantic_name))
+      // delete this.test_markers[location.semantic_name];
     }
   }
 
@@ -306,8 +333,8 @@ export class FieldGroup {
       map((location: string) => {
         if (location.length >= 2) {
           return this._locations.getDistinctLocations().pipe(first()).map(res => res.columns.filter(row =>
-             location.toLowerCase().split(' ').every(r => row['semantic_name'].toLowerCase().split(' ').find(a => a.indexOf(r) > -1))
-              // row['semantic_name'].toLowerCase().split(' ').some(e => e.indexOf())
+              location.toLowerCase().split(' ').every(r => row['semantic_name'].toLowerCase().split(' ').find(a => a.indexOf(r) > -1))
+            // row['semantic_name'].toLowerCase().split(' ').some(e => e.indexOf())
             )
           );
         } else {
