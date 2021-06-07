@@ -5,6 +5,13 @@
     display: inline-block;
 }
 
+.scrollable {
+    width: 200px;
+    overflow: auto;
+    white-space: nowrap;
+}
+
+
 
 .circle {
     border-radius: 50%;
