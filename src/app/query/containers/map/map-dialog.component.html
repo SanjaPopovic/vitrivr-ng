@@ -23,7 +23,7 @@
                           *ngFor="let location of taggedLocations, let i = index" [removable]="true"
                           [selectable]="true"
                           id="{{location.semantic_name}}">
-                    <div class="circle">{{i + 1}}</div>
+<!--                    <div class="circle">{{i + 1}}</div>-->
                     {{location.semantic_name}}&nbsp;
                     <mat-icon matChipRemove matTooltip="Remove location from list">cancel</mat-icon>
                 </mat-chip>
