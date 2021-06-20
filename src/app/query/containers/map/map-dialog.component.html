@@ -29,6 +29,18 @@
                 </mat-chip>
             </mat-chip-list>
         </div>
+        <div style="display: flex; margin-top: 5px;">
+            <mat-chip-list [style.margin-top]="'50px'">
+                <p>Areas</p>
+                <mat-chip class="dropdown" (removed)="removeLocation(location)"
+                          *ngFor="let location of allDrawnCircles, let i = index" [removable]="true"
+                          [selectable]="true"
+                          id="{{i}}">
+                    <div class="circle">{{i + 1}}</div>
+                    <mat-icon matChipRemove matTooltip="Remove location from list">cancel</mat-icon>
+                </mat-chip>
+            </mat-chip-list>
+        </div>
     </div>
 </div>
 

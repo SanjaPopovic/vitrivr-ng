@@ -164,7 +164,7 @@ export class MapDialogComponent implements OnInit {
   }
 
   public deleteMarker(marker?: Circle) {
-    if (typeof marker === 'undefined') {
+    if (typeof marker === 'undefined') { // if circle or marker are deleted in map!
       const _this = this;
       const markers_on_map = [];
       this.popUpMap.eachLayer(function(layer) {
@@ -184,7 +184,8 @@ export class MapDialogComponent implements OnInit {
           this.test_markers.splice(i, 1);
         }
       }
-    } else {
+      console.log('IN FIRST CONDITION')
+    } else { // if circle or marker are deleted in list!
       console.log('In deleteMarker() + ' + marker.semantic_name);
       // console.log(this.test_markers.hasOwnProperty('semantic_name'))
       for (let i = this.test_markers.length - 1; i >= 0; i--) {
@@ -195,6 +196,7 @@ export class MapDialogComponent implements OnInit {
           this.test_markers.splice(i, 1);
         }
       }
+      console.log('IN SECOND CONDITION')
     }
   }
 
@@ -308,6 +310,10 @@ export class MapDialogComponent implements OnInit {
 
   get taggedLocations() {
     return this.markers;
+  }
+
+  get allDrawnCircles() {
+    return this.drawnCircles;
   }
 }
 
