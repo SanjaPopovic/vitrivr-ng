@@ -39,6 +39,7 @@ export class MapDialogComponent implements OnInit {
   private markers: Circle[] = [];
   private drawnCircles: Circle[] = [];
   private test_markers: Array<{ [semantic_name: string]: [Circle, L.marker]; }>;
+  private test_drawnCircles: Array<L.circle | number>; // [] = rad, lon, lat, L.circle
 
   private drawnItems;
   /** List of tag fields currently displayed. */
@@ -66,12 +67,15 @@ export class MapDialogComponent implements OnInit {
 
     tiles.addTo(this.popUpMap);
 
+    this.test_drawnCircles = Array<L.circle | number>();
     this.test_markers = Array<{ [semantic_name: string]: [Circle, L.marker]; }>();
     this.data.mapState.forEach((circle) => {
       if (circle.type === 'circle') {
         const newCircle = L.circle([circle.lat, circle.lon], circle.rad, colorOptions);
         newCircle.addTo(this.popUpMap);
         items.push(newCircle);
+        this.drawnCircles.push(circle);
+        this.test_drawnCircles.push([circle.rad, circle.lon, circle.lat, newCircle]);
       } else if (circle.type === 'info') {
         // draw Marker!
         const marker = L.marker([circle.lat, circle.lon]);
@@ -126,7 +130,7 @@ export class MapDialogComponent implements OnInit {
           lat: layer.getLatLng().lat,
           rad: layer.getRadius()
         }
-        _this.updateDrawnCircles(circle);
+        _this.updateDrawnCircles(circle, layer);
       }
     });
     this.popUpMap.on('draw:deleted', function (e) {
@@ -138,8 +142,9 @@ export class MapDialogComponent implements OnInit {
     });
   }
 
-  public updateDrawnCircles(circle: Circle) {
+  public updateDrawnCircles(circle: Circle, layer: L.circle) {
     this.drawnCircles.push(circle);
+    this.test_drawnCircles.push([circle.rad, circle.lon, circle.lat, layer]);
   }
 
   public updateMarkers(marker: Circle) {
@@ -153,7 +158,7 @@ export class MapDialogComponent implements OnInit {
     this.drawnItems.addLayer(markerInPopUp);
 
     const tempDict = {} // save <circle-object and corresponding marker in map>
-    tempDict[marker.semantic_name] = [marker, markerInPopUp];
+    tempDict[marker.semantic_name] = [marker, markerInPopUp]; // new dictionary with one key
     this.test_markers.push(tempDict);
     console.log('this.test_markers + ' + this.test_markers);
   }
@@ -167,16 +172,16 @@ export class MapDialogComponent implements OnInit {
     if (typeof marker === 'undefined') { // if circle or marker are deleted in map!
       const _this = this;
       const markers_on_map = [];
-      this.popUpMap.eachLayer(function(layer) {
+      this.popUpMap.eachLayer(function (layer) {
         if (layer instanceof L.Marker) {
-            markers_on_map.push(layer._popup._content);
+          markers_on_map.push(layer._popup._content);
         }
       });
       for (let i = this.test_markers.length - 1; i >= 0; i--) {
         let key = '';
         for (key in this.test_markers[i]) { // get value of key, which is semantic_name
         }
-        if (markers_on_map.indexOf(key) < 0 ) { // deleted in map -> delete in tags
+        if (markers_on_map.indexOf(key) < 0) { // deleted in map -> delete in tags
           const index = this.markers.indexOf(this.test_markers[i][key][0]);
           if (index > -1) {
             this.markers.splice(index, 1);
@@ -186,15 +191,26 @@ export class MapDialogComponent implements OnInit {
       }
       console.log('IN FIRST CONDITION')
     } else { // if circle or marker are deleted in list!
-      console.log('In deleteMarker() + ' + marker.semantic_name);
+      // console.log('In deleteMarker() + ' + marker.semantic_name);
       // console.log(this.test_markers.hasOwnProperty('semantic_name'))
-      for (let i = this.test_markers.length - 1; i >= 0; i--) {
-        if (this.test_markers[i].hasOwnProperty(marker.semantic_name)) {
-          console.log('here');
-          this.popUpMap.removeLayer(this.test_markers[i][marker.semantic_name][1]);
-          delete this.test_markers[marker.semantic_name];
-          this.test_markers.splice(i, 1);
+
+      if (marker.semantic_name !== '') { // if a location-tag is deleted
+        for (let i = this.test_markers.length - 1; i >= 0; i--) {
+          if (this.test_markers[i].hasOwnProperty(marker.semantic_name)) {
+            console.log('here');
+            this.popUpMap.removeLayer(this.test_markers[i][marker.semantic_name][1]);
+            delete this.test_markers[marker.semantic_name];
+            this.test_markers.splice(i, 1);
+          }
         }
+      } else if (marker.semantic_name === '') { // if a circle-tag is deleted
+        for (let i = this.test_drawnCircles.length - 1; i >= 0; i--) { // check rad, lon, lat
+
+          this.popUpMap.removeLayer(this.test_drawnCircles[i][3]);
+          this.test_drawnCircles.splice(i, 1);
+
+        }
+        console.log('circle-tag got deleted')
       }
       console.log('IN SECOND CONDITION')
     }
@@ -287,8 +303,8 @@ export class MapDialogComponent implements OnInit {
    * @param {Tag} tag The tag that should be added.
    */
   public addLocation(location: Circle) {
-    this.markers.push(location);
-    this.updateMarkers(location);
+    this.markers.push(location); // add new location as tag
+    this.updateMarkers(location); // add new location as marker in map
     this.field.formControl.setValue('');
   }
 
@@ -298,13 +314,21 @@ export class MapDialogComponent implements OnInit {
    * @param {Tag} tag The tag that should be removed.
    */
   public removeLocation(location: Circle) {
-    const index = this.markers.indexOf(location);
-    if (index > -1) {
-      this.markers.splice(index, 1);
-      this.deleteMarker(location);
+    if (location.semantic_name !== '') { // marker is deleted by removing tag
+      const index = this.markers.indexOf(location);
+      if (index > -1) {
+        this.markers.splice(index, 1);
+        this.deleteMarker(location);
 
-      // console.log(this.test_markers.hasOwnProperty(location.semantic_name))
-      // delete this.test_markers[location.semantic_name];
+        // console.log(this.test_markers.hasOwnProperty(location.semantic_name))
+        // delete this.test_markers[location.semantic_name];
+      }
+    } else if (location.semantic_name === '') { // circle is deleted by removing tag
+      const index = this.drawnCircles.indexOf(location);
+      if (index > -1) {
+        this.drawnCircles.splice(index, 1);
+        this.deleteMarker(location);
+      }
     }
   }
 
