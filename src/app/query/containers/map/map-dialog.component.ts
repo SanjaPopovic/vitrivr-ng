@@ -37,9 +37,9 @@ export class MapDialogComponent implements OnInit {
   // How to distinguish them: circle.type = 'info' and circle.type = 'circle'
   private mapState: Circle[] = [];
   private markers: Circle[] = [];
-  private drawnCircles: Circle[] = [];
+  private drawnCircles: Circle[] = []; // tags
   private test_markers: Array<{ [semantic_name: string]: [Circle, L.marker]; }>;
-  private test_drawnCircles: (number|L.circle)[][]; // [] = rad, lon, lat, L.circle
+  private test_drawnCircles: (number|L.circle)[][]; // [] = [rad, lon, lat, L.circle] correspond to drawnCircles, has ref to L.Circle
 
   private drawnItems;
   /** List of tag fields currently displayed. */
@@ -179,7 +179,6 @@ export class MapDialogComponent implements OnInit {
           markers_on_map.push(layer._popup._content);
         } else if (layer instanceof L.Circle) {
           console.log('WUUUUUT');
-          console.log(layer);
           const circle: Circle = {
             type: 'circle',
             semantic_name: '',
@@ -187,7 +186,6 @@ export class MapDialogComponent implements OnInit {
             lat: layer.getLatLng().lat,
             rad: layer.getRadius()
           }
-          // const temp = [layer._mRadius, layer._latlng.lng, layer._latlng.lat];
           circles_on_map.push(circle);
         }
       });
@@ -203,7 +201,30 @@ export class MapDialogComponent implements OnInit {
           }
         }
       }
-      console.log('circles on map = ' + circles_on_map);
+
+      for (let i = this.drawnCircles.length - 1; i >= 0; i--) {
+        let isPresent_dc = false;
+        for (let j = 0; j < circles_on_map.length; j++) {
+          if (circles_on_map[j].rad === this.drawnCircles[i].rad && circles_on_map[j].lon === this.drawnCircles[i].lon && circles_on_map[j].lat === this.drawnCircles[i].lat) {
+            isPresent_dc = true;
+          }
+        }
+        if (isPresent_dc === false) {
+          this.drawnCircles.splice(i, 1);
+        }
+      }
+      for (let i = this.test_drawnCircles.length - 1; i >= 0; i--) {
+        let isPresent_dc = false;
+        for (let j = 0; j < circles_on_map.length; j++) {
+          if (circles_on_map[j].rad === this.test_drawnCircles[i][0] && circles_on_map[j].lon === this.test_drawnCircles[i][1] && circles_on_map[j].lat === this.test_drawnCircles[i][2]) {
+            isPresent_dc = true;
+          }
+        }
+        if (isPresent_dc === false) {
+          this.test_drawnCircles.splice(i, 1);
+        }
+      }
+      /*console.log('circles on map = ' + circles_on_map);
       for (let i = this.test_drawnCircles.length - 1; i >= 0; i--) { // go through all circles in map
         const rad = i[0], lon = i[1], lat = i[2];
         let isPresent = false;
@@ -222,7 +243,7 @@ export class MapDialogComponent implements OnInit {
           }
 
         }
-      }
+      }*/
       console.log(this.drawnCircles);
       console.log('IN FIRST CONDITION')
     } else { // if circle or marker are deleted in list!
