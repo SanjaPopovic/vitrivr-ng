@@ -39,7 +39,7 @@ export class MapDialogComponent implements OnInit {
   private markers: Circle[] = [];
   private drawnCircles: Circle[] = [];
   private test_markers: Array<{ [semantic_name: string]: [Circle, L.marker]; }>;
-  private test_drawnCircles: Array<L.circle | number>; // [] = rad, lon, lat, L.circle
+  private test_drawnCircles: (number|L.circle)[][]; // [] = rad, lon, lat, L.circle
 
   private drawnItems;
   /** List of tag fields currently displayed. */
@@ -67,7 +67,7 @@ export class MapDialogComponent implements OnInit {
 
     tiles.addTo(this.popUpMap);
 
-    this.test_drawnCircles = Array<L.circle | number>();
+    this.test_drawnCircles = [];
     this.test_markers = Array<{ [semantic_name: string]: [Circle, L.marker]; }>();
     this.data.mapState.forEach((circle) => {
       if (circle.type === 'circle') {
@@ -145,6 +145,7 @@ export class MapDialogComponent implements OnInit {
   public updateDrawnCircles(circle: Circle, layer: L.circle) {
     this.drawnCircles.push(circle);
     this.test_drawnCircles.push([circle.rad, circle.lon, circle.lat, layer]);
+    console.log(this.test_drawnCircles);
   }
 
   public updateMarkers(marker: Circle) {
@@ -172,12 +173,25 @@ export class MapDialogComponent implements OnInit {
     if (typeof marker === 'undefined') { // if circle or marker are deleted in map!
       const _this = this;
       const markers_on_map = [];
+      const circles_on_map: Circle[] = [];
       this.popUpMap.eachLayer(function (layer) {
         if (layer instanceof L.Marker) {
           markers_on_map.push(layer._popup._content);
+        } else if (layer instanceof L.Circle) {
+          console.log('WUUUUUT');
+          console.log(layer);
+          const circle: Circle = {
+            type: 'circle',
+            semantic_name: '',
+            lon: layer.getLatLng().lng,
+            lat: layer.getLatLng().lat,
+            rad: layer.getRadius()
+          }
+          // const temp = [layer._mRadius, layer._latlng.lng, layer._latlng.lat];
+          circles_on_map.push(circle);
         }
       });
-      for (let i = this.test_markers.length - 1; i >= 0; i--) {
+      for (let i = this.test_markers.length - 1; i >= 0; i--) { // go through all markers in map
         let key = '';
         for (key in this.test_markers[i]) { // get value of key, which is semantic_name
         }
@@ -185,10 +199,31 @@ export class MapDialogComponent implements OnInit {
           const index = this.markers.indexOf(this.test_markers[i][key][0]);
           if (index > -1) {
             this.markers.splice(index, 1);
+            this.test_markers.splice(i, 1);
           }
-          this.test_markers.splice(i, 1);
         }
       }
+      console.log('circles on map = ' + circles_on_map);
+      for (let i = this.test_drawnCircles.length - 1; i >= 0; i--) { // go through all circles in map
+        const rad = i[0], lon = i[1], lat = i[2];
+        let isPresent = false;
+        for (let j = 0; j < circles_on_map.length && isPresent === false; j++) {
+          if (rad === circles_on_map[j].rad && lon === circles_on_map[j].lon && lat === circles_on_map[j].lat) {
+            isPresent = true;
+          }
+        }
+        if (isPresent === false) { // if circle not present in map layers
+          this.test_drawnCircles.splice(i, 1);
+          for (let k = this.drawnCircles.length - 1; k >= 0; k--) {
+            if (rad === this.drawnCircles[k].rad && lon === this.drawnCircles[k].lon && lat === this.drawnCircles[k].lat) {
+              this.drawnCircles.splice(k, 1);
+              console.log('drawn circles = ' + this.drawnCircles);
+            }
+          }
+
+        }
+      }
+      console.log(this.drawnCircles);
       console.log('IN FIRST CONDITION')
     } else { // if circle or marker are deleted in list!
       // console.log('In deleteMarker() + ' + marker.semantic_name);
@@ -204,13 +239,13 @@ export class MapDialogComponent implements OnInit {
           }
         }
       } else if (marker.semantic_name === '') { // if a circle-tag is deleted
+        const rad = marker.rad, lon = marker.lon, lat = marker.lat;
         for (let i = this.test_drawnCircles.length - 1; i >= 0; i--) { // check rad, lon, lat
-
-          this.popUpMap.removeLayer(this.test_drawnCircles[i][3]);
-          this.test_drawnCircles.splice(i, 1);
-
+          if (rad === this.test_drawnCircles[i][0] && lon === this.test_drawnCircles[i][1] && lat === this.test_drawnCircles[i][2]) {
+            this.popUpMap.removeLayer(this.test_drawnCircles[i][3]);
+            this.test_drawnCircles.splice(i, 1);
+          }
         }
-        console.log('circle-tag got deleted')
       }
       console.log('IN SECOND CONDITION')
     }
