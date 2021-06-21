@@ -136,8 +136,6 @@ export class MapDialogComponent implements OnInit {
     this.popUpMap.on('draw:deleted', function (e) {
       const type = e.layerType,
         layer = e.layer;
-      // __this.addLayer(layer);
-      console.log('DELETED')
       _this.deleteMarker();
     });
   }
@@ -145,7 +143,6 @@ export class MapDialogComponent implements OnInit {
   public updateDrawnCircles(circle: Circle, layer: L.circle) {
     this.drawnCircles.push(circle);
     this.test_drawnCircles.push([circle.rad, circle.lon, circle.lat, layer]);
-    console.log(this.test_drawnCircles);
   }
 
   public updateMarkers(marker: Circle) {
@@ -161,7 +158,6 @@ export class MapDialogComponent implements OnInit {
     const tempDict = {} // save <circle-object and corresponding marker in map>
     tempDict[marker.semantic_name] = [marker, markerInPopUp]; // new dictionary with one key
     this.test_markers.push(tempDict);
-    console.log('this.test_markers + ' + this.test_markers);
   }
 
   // tslint:disable-next-line:max-line-length
@@ -171,14 +167,12 @@ export class MapDialogComponent implements OnInit {
 
   public deleteMarker(marker?: Circle) {
     if (typeof marker === 'undefined') { // if circle or marker are deleted in map!
-      const _this = this;
       const markers_on_map = [];
       const circles_on_map: Circle[] = [];
       this.popUpMap.eachLayer(function (layer) {
         if (layer instanceof L.Marker) {
           markers_on_map.push(layer._popup._content);
         } else if (layer instanceof L.Circle) {
-          console.log('WUUUUUT');
           const circle: Circle = {
             type: 'circle',
             semantic_name: '',
@@ -224,36 +218,10 @@ export class MapDialogComponent implements OnInit {
           this.test_drawnCircles.splice(i, 1);
         }
       }
-      /*console.log('circles on map = ' + circles_on_map);
-      for (let i = this.test_drawnCircles.length - 1; i >= 0; i--) { // go through all circles in map
-        const rad = i[0], lon = i[1], lat = i[2];
-        let isPresent = false;
-        for (let j = 0; j < circles_on_map.length && isPresent === false; j++) {
-          if (rad === circles_on_map[j].rad && lon === circles_on_map[j].lon && lat === circles_on_map[j].lat) {
-            isPresent = true;
-          }
-        }
-        if (isPresent === false) { // if circle not present in map layers
-          this.test_drawnCircles.splice(i, 1);
-          for (let k = this.drawnCircles.length - 1; k >= 0; k--) {
-            if (rad === this.drawnCircles[k].rad && lon === this.drawnCircles[k].lon && lat === this.drawnCircles[k].lat) {
-              this.drawnCircles.splice(k, 1);
-              console.log('drawn circles = ' + this.drawnCircles);
-            }
-          }
-
-        }
-      }*/
-      console.log(this.drawnCircles);
-      console.log('IN FIRST CONDITION')
     } else { // if circle or marker are deleted in list!
-      // console.log('In deleteMarker() + ' + marker.semantic_name);
-      // console.log(this.test_markers.hasOwnProperty('semantic_name'))
-
       if (marker.semantic_name !== '') { // if a location-tag is deleted
         for (let i = this.test_markers.length - 1; i >= 0; i--) {
           if (this.test_markers[i].hasOwnProperty(marker.semantic_name)) {
-            console.log('here');
             this.popUpMap.removeLayer(this.test_markers[i][marker.semantic_name][1]);
             delete this.test_markers[marker.semantic_name];
             this.test_markers.splice(i, 1);
@@ -268,17 +236,12 @@ export class MapDialogComponent implements OnInit {
           }
         }
       }
-      console.log('IN SECOND CONDITION')
     }
   }
 
   ngOnInit(): void {
     this.initMap();
   }
-
-  /*  public removeLocation(i) {
-      this.locations.splice(i, 1);
-    }*/
 
   /**
    * Closes the dialog.
@@ -301,7 +264,6 @@ export class MapDialogComponent implements OnInit {
     const markersAsCircles = []
 
     for (let i = this.test_markers.length - 1; i >= 0; i--) {
-      console.log('here');
       if (Object.keys(this.test_markers[i]).length === 1) {
         const key = Object.keys(this.test_markers[i]);
         markersAsCircles.push(this.test_markers[i][key.toString()][0])
@@ -336,7 +298,6 @@ export class MapDialogComponent implements OnInit {
         locationAlreadyInList = true;
       }
     }
-    // console.log(locationAlreadyInList);
     if (!locationAlreadyInList) {
       const circle: Circle = {
         type: 'info',
@@ -375,9 +336,6 @@ export class MapDialogComponent implements OnInit {
       if (index > -1) {
         this.markers.splice(index, 1);
         this.deleteMarker(location);
-
-        // console.log(this.test_markers.hasOwnProperty(location.semantic_name))
-        // delete this.test_markers[location.semantic_name];
       }
     } else if (location.semantic_name === '') { // circle is deleted by removing tag
       const index = this.drawnCircles.indexOf(location);
