@@ -141,7 +141,25 @@ export class MapDialogComponent implements OnInit {
 
   public updateDrawnCircles(circle: Circle, layer: L.circle) {
     this.drawnCircles.push(circle);
-    this.test_drawnCircles.push([circle.rad, circle.lon, circle.lat, layer]);
+
+    this.popUpMap.eachLayer((clayer) => {
+      if (clayer instanceof L.Circle) {
+        clayer.remove();
+      }
+    });
+    const colorOptions = {
+      color: 'red',
+      fillColor: '#f03',
+      fillOpacity: 0
+    }
+    this.test_drawnCircles.length = 0;
+    for (let i = 0; i < this.drawnCircles.length; i++) {
+      const updatedCircle = L.circle([this.drawnCircles[i].lat, this.drawnCircles[i].lon], this.drawnCircles[i].rad, colorOptions).bindTooltip((i + 1).toString());
+      updatedCircle.addTo(this.popUpMap); // bindToolTip(i.toString()).
+      this.test_drawnCircles.push([this.drawnCircles[i].rad, this.drawnCircles[i].lon, this.drawnCircles[i].lat, updatedCircle])
+    }
+
+    // this.test_drawnCircles.push([circle.rad, circle.lon, circle.lat, layer]);
   }
 
   public updateMarkers(marker: Circle) {
@@ -253,7 +271,7 @@ export class MapDialogComponent implements OnInit {
         }
         this.test_drawnCircles.length = 0;
         for (let i = 0; i < this.drawnCircles.length; i++) {
-          const updatedCircle = L.circle([this.drawnCircles[i].lat, this.drawnCircles[i].lon], this.drawnCircles[i].rad, colorOptions).bindTooltip((i+1).toString());
+          const updatedCircle = L.circle([this.drawnCircles[i].lat, this.drawnCircles[i].lon], this.drawnCircles[i].rad, colorOptions).bindTooltip((i + 1).toString());
           updatedCircle.addTo(this.popUpMap); // bindToolTip(i.toString()).
           this.test_drawnCircles.push([this.drawnCircles[i].rad, this.drawnCircles[i].lon, this.drawnCircles[i].lat, updatedCircle])
         }
