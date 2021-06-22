@@ -157,6 +157,7 @@ export class MapDialogComponent implements OnInit {
       const updatedCircle = L.circle([this.drawnCircles[i].lat, this.drawnCircles[i].lon], this.drawnCircles[i].rad, colorOptions).bindTooltip((i + 1).toString());
       updatedCircle.addTo(this.popUpMap); // bindToolTip(i.toString()).
       this.test_drawnCircles.push([this.drawnCircles[i].rad, this.drawnCircles[i].lon, this.drawnCircles[i].lat, updatedCircle])
+      updatedCircle.addTo(this.drawnItems);
     }
 
     // this.test_drawnCircles.push([circle.rad, circle.lon, circle.lat, layer]);
@@ -184,6 +185,7 @@ export class MapDialogComponent implements OnInit {
 
   public deleteMarker(marker?: Circle) {
     if (typeof marker === 'undefined') { // if circle or marker are deleted in map!
+      console.log('in undefined');
       const markers_on_map = [];
       const circles_on_map: Circle[] = [];
       this.popUpMap.eachLayer(function (layer) {
@@ -235,6 +237,24 @@ export class MapDialogComponent implements OnInit {
           this.test_drawnCircles.splice(i, 1);
         }
       }
+      this.popUpMap.eachLayer((layer) => {
+        if (layer instanceof L.Circle) {
+          console.log('deleteeeed')
+          layer.remove();
+        }
+      });
+      const colorOptions = {
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0
+      }
+      this.test_drawnCircles.length = 0;
+      for (let i = 0; i < this.drawnCircles.length; i++) { // re-add all circles but add updated tooltips
+        const updatedCircle = L.circle([this.drawnCircles[i].lat, this.drawnCircles[i].lon], this.drawnCircles[i].rad, colorOptions).bindTooltip((i + 1).toString());
+        updatedCircle.addTo(this.popUpMap); // bindToolTip(i.toString()).
+        this.test_drawnCircles.push([this.drawnCircles[i].rad, this.drawnCircles[i].lon, this.drawnCircles[i].lat, updatedCircle])
+        updatedCircle.addTo(this.drawnItems);
+      }
     } else { // if circle or marker are deleted in list!
       if (marker.semantic_name !== '') { // if a location-tag is deleted
         for (let i = this.test_markers.length - 1; i >= 0; i--) {
@@ -270,10 +290,11 @@ export class MapDialogComponent implements OnInit {
           fillOpacity: 0
         }
         this.test_drawnCircles.length = 0;
-        for (let i = 0; i < this.drawnCircles.length; i++) {
+        for (let i = 0; i < this.drawnCircles.length; i++) { // re-add all circles but add updated tooltips
           const updatedCircle = L.circle([this.drawnCircles[i].lat, this.drawnCircles[i].lon], this.drawnCircles[i].rad, colorOptions).bindTooltip((i + 1).toString());
           updatedCircle.addTo(this.popUpMap); // bindToolTip(i.toString()).
           this.test_drawnCircles.push([this.drawnCircles[i].rad, this.drawnCircles[i].lon, this.drawnCircles[i].lat, updatedCircle])
+          updatedCircle.addTo(this.drawnItems);
         }
       }
     }
