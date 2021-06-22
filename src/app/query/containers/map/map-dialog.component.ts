@@ -64,17 +64,16 @@ export class MapDialogComponent implements OnInit {
       fillOpacity: 0
     }
 
-
     tiles.addTo(this.popUpMap);
 
     this.test_drawnCircles = [];
     this.test_markers = Array<{ [semantic_name: string]: [Circle, L.marker]; }>();
     this.data.mapState.forEach((circle) => {
       if (circle.type === 'circle') {
-        const newCircle = L.circle([circle.lat, circle.lon], circle.rad, colorOptions);
+        this.drawnCircles.push(circle);
+        const newCircle = L.circle([circle.lat, circle.lon], circle.rad, colorOptions).bindTooltip(this.drawnCircles.length.toString());
         newCircle.addTo(this.popUpMap);
         items.push(newCircle);
-        this.drawnCircles.push(circle);
         this.test_drawnCircles.push([circle.rad, circle.lon, circle.lat, newCircle]);
       } else if (circle.type === 'info') {
         // draw Marker!
@@ -235,6 +234,29 @@ export class MapDialogComponent implements OnInit {
             this.test_drawnCircles.splice(i, 1);
           }
         }
+        /*this.popUpMap.eachLayer(function (layer) {
+          if (layer instanceof L.Circle) {
+            layer.unbindToolTip();
+          }
+        });*/
+        console.log('hello');
+        this.popUpMap.eachLayer((layer) => {
+          if (layer instanceof L.Circle) {
+            console.log('deleteeeed')
+            layer.remove();
+          }
+        });
+        const colorOptions = {
+          color: 'red',
+          fillColor: '#f03',
+          fillOpacity: 0
+        }
+        this.test_drawnCircles.length = 0;
+        for (let i = 0; i < this.drawnCircles.length; i++) {
+          const updatedCircle = L.circle([this.drawnCircles[i].lat, this.drawnCircles[i].lon], this.drawnCircles[i].rad, colorOptions).bindTooltip((i+1).toString());
+          updatedCircle.addTo(this.popUpMap); // bindToolTip(i.toString()).
+          this.test_drawnCircles.push([this.drawnCircles[i].rad, this.drawnCircles[i].lon, this.drawnCircles[i].lat, updatedCircle])
+        }
       }
     }
   }
@@ -277,6 +299,9 @@ export class MapDialogComponent implements OnInit {
         console.log(elem.type);
       }
     });
+    for (let i = 0; i < this.drawnCircles.length; i++) { // test
+      console.log(document.getElementById(i.toString()).innerText);
+    }
     this._dialogRef.close(this.mapState);
   }
 
