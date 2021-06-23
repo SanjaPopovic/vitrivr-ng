@@ -1,4 +1,4 @@
-import {Component, HostListener, OnInit, QueryList, ViewChildren} from '@angular/core';
+import {Component, HostListener, OnInit, Output, QueryList, ViewChildren} from '@angular/core';
 import {QueryService} from '../core/queries/query.service';
 import {QueryContainerInterface} from '../shared/model/queries/interfaces/query-container.interface';
 import {StagedQueryContainer} from '../shared/model/queries/staged-query-container.model';
@@ -9,6 +9,7 @@ import {InteractionEvent} from '../shared/model/events/interaction-event.model';
 import {FilterService} from '../core/queries/filter.service';
 import {QueryContainerComponent} from './containers/query-container.component';
 import {TemporalFusionFunction} from '../shared/model/results/fusion/temporal-fusion-function.model';
+import {startWith} from 'rxjs/operators';
 
 
 @Component({
@@ -18,9 +19,11 @@ import {TemporalFusionFunction} from '../shared/model/results/fusion/temporal-fu
 export class QuerySidebarComponent implements OnInit {
   /** StagedQueryContainer's held by the current instance of ResearchComponent. */
   public readonly containers: QueryContainerInterface[] = [];
-  @ViewChildren(QueryContainerComponent) queryContainers: QueryList<QueryContainerComponent>;
+  @ViewChildren(QueryContainerComponent) queryContainers: QueryList<QueryContainerComponent>; // all existing query containers
   /** A timestamp used to store the timestamp of the last Enter-hit by the user. Required for shortcut detection. */
   private _lastEnter = 0;
+
+  num_maps: number;
 
   constructor(private _queryService: QueryService, private _filterService: FilterService, private _eventBus: EventBusService) {
   }
@@ -29,6 +32,7 @@ export class QuerySidebarComponent implements OnInit {
    * Lifecycle Callback (OnInit): Adds a new QueryTermContainer.
    */
   public ngOnInit() {
+    this.num_maps = 0;
     this.addQueryTermContainer();
   }
 
@@ -36,6 +40,7 @@ export class QuerySidebarComponent implements OnInit {
    * Adds a new StagedQueryContainer to the list of QueryContainers.
    */
   public addQueryTermContainer() {
+    this.num_maps += 1;
     this.containers.push(new StagedQueryContainer());
   }
 

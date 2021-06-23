@@ -1,5 +1,4 @@
 <div style="text-align:center;">
-
     <div [style.margin-bottom]="'15px'">
         <button (click)="onSearchClicked()" (keydown.control.enter)="onSearchClicked()" [color]="'accent'"
                 mat-raised-button
@@ -16,7 +15,7 @@
         </button>
     </div>
 
-    <app-query-container *ngFor="let container of containers" [containerModel]=container
+    <app-query-container [map_id]="num_maps" *ngFor="let container of containers" [containerModel]=container
                          [inList]="containers"></app-query-container>
 
     <button (click)="addQueryTermContainer()" mat-fab matTooltip="Add query container">

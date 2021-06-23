@@ -1,1 +1,4 @@
-<div id="map" #map (click)="onViewerClicked()" matTooltip="Click to indicate a location."></div>
+<li *ngFor="let map of map_list">
+    <div id="map{{map}}" (click)="onViewerClicked()" class="mapStyle" matTooltip="Click to indicate a location."
+    ></div>
+</li>

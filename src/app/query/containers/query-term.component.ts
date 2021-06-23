@@ -23,6 +23,7 @@ export class QueryTermComponent {
    * 1 = move up in filter sequence (e.g. stage 1 goes to stage 0), -1 = move down in filter sequence (e.g. stage 1 goes to stage 2)
    */
   @Output() stageChange = new EventEmitter<StageChangeEvent>();
+  @Input() map_id: any;
 
   constructor(private readonly _config: AppConfig) {
   }

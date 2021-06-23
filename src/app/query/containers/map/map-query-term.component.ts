@@ -12,20 +12,21 @@ import {Circle} from './circle';
 @Component({
   selector: 'app-qt-map',
   templateUrl: 'map-query-term.component.html',
-  styleUrls: ['./map-query-term.component.css']
+  styleUrls: ['map-query-term.component.css']
 })
-export class MapQueryTermComponent implements OnInit {
+export class MapQueryTermComponent implements AfterViewInit {
 
   @Input()
   private mapTerm: MapQueryTerm;
-  @ViewChild('map', {static: true})
   private map;
   @Output() mapState: Circle[] = [];
+  @Input() id: number;
+  private map_list = [];
 
   // Instruction to create map is taken from https://www.digitalocean.com/community/tutorials/angular-angular-and-leaflet
   private initMap(): void {
-    this.map = L.map('map', {
-      center: [ 47.5595986, 7.5885761 ],
+    this.map = L.map('map' + this.id, {
+      center: [47.5595986, 7.5885761],
       zoom: 3
     });
 
@@ -39,9 +40,15 @@ export class MapQueryTermComponent implements OnInit {
 
   }
 
-  constructor(private _dialog: MatDialog) { }
+  constructor(private _dialog: MatDialog) {
 
-  ngOnInit(): void {
+  }
+
+  ngOnInit() {
+    this.map_list.push(this.id);
+  }
+
+  ngAfterViewInit(): void {
     this.initMap();
   }
 
@@ -58,7 +65,7 @@ export class MapQueryTermComponent implements OnInit {
       fillOpacity: 0
     }
     console.log('data that will go to cineast')
-    result.forEach( (res) => {
+    result.forEach((res) => {
       if (res.type === 'circle') { // other case when res[0]==='info'. This comes from MapTag
         const circle = L.circle([res.lat, res.lon], res.rad, colorOptions);
         circle.addTo(this.map);

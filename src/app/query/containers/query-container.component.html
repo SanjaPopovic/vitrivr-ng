@@ -103,8 +103,8 @@
     <mat-divider></mat-divider>
     <!-- actual query container content. -->
     <div style="padding-top:10px;">
-        <app-query-stage *ngFor="let qs of containerModel.stages" [queryStage]="qs"
-                         [qsList]="containerModel.stages"></app-query-stage>
+        <app-query-stage  *ngFor="let qs of containerModel.stages" [queryStage]="qs"
+                         [qsList]="containerModel.stages" [map_id]="map_id"></app-query-stage>
     </div>
     <!-- button to shift temporal context downward -->
     <div style="display: inline-flex;justify-content: center;align-items: center;width:100%" *ngIf="isNotLast">

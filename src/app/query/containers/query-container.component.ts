@@ -1,10 +1,12 @@
-import {Component, Input, QueryList, ViewChildren} from '@angular/core';
+import {Component, Inject, Input, QueryList, ViewChildren} from '@angular/core';
 import {QueryContainerInterface} from '../../shared/model/queries/interfaces/query-container.interface';
 import {Config} from '../../shared/model/config/config.model';
 import {Observable} from 'rxjs';
 import {TemporalDistanceComponent} from '../temporal-distance/temporal-distance.component';
 import {AppConfig} from '../../app.config';
 import {QueryTerm} from '../../../../openapi/cineast';
+import {MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {Circle} from './map/circle';
 
 @Component({
   selector: 'app-query-container',
@@ -13,6 +15,9 @@ import {QueryTerm} from '../../../../openapi/cineast';
 })
 
 export class QueryContainerComponent {
+
+  private isMapInContainer = false;
+
   /** The StagedQueryContainer this QueryContainerComponent is associated to. */
   @Input() containerModel: QueryContainerInterface;
 
@@ -23,6 +28,8 @@ export class QueryContainerComponent {
 
   /** A reference to the observable Config exposed by ConfigService. */
   private readonly _config: Observable<Config>;
+
+  @Input() map_id: number;
 
   /**
    * Constructor; injects ConfigService
@@ -71,10 +78,14 @@ export class QueryContainerComponent {
     }
   }
 
-  public onToggleButtonClicked(type: QueryTerm.TypeEnum) {
+  public onToggleButtonClicked(type: QueryTerm.TypeEnum) { // add or remove query term from ONE container
     if (this.containerModel.hasTerm(type)) {
       this.containerModel.removeTerm(type);
-    } else {
+    } else { // here: take new possible id from query-sidebar and send it to query-term
+      if (type === 'MAP') {
+        this.isMapInContainer = true;
+        // console.log('the id for a map query term would be = ' + this.map_id);
+      }
       this.containerModel.addTerm(type);
     }
   }

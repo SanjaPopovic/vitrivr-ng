@@ -16,6 +16,8 @@ export class QueryStageComponent {
 
   @Input() qsList: QueryStage[];
 
+  @Input() map_id: number
+
   constructor(private _configService: AppConfig) {
 
   }
