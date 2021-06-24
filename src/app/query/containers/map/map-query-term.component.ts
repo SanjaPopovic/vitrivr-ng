@@ -45,6 +45,7 @@ export class MapQueryTermComponent implements AfterViewInit {
   }
 
   ngOnInit() {
+    console.log('ID of map in added/moved query term = ' + this.id);
     this.map_list.push(this.id);
   }
 

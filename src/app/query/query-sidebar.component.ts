@@ -44,6 +44,10 @@ export class QuerySidebarComponent implements OnInit {
     this.containers.push(new StagedQueryContainer());
   }
 
+  public updateMapId() {
+    this.num_maps += 1;
+  }
+
   /**
    * Triggers the similarity onSearchClicked by packing all configured QueryContainers into a single
    * SimilarityQuery message, and submitting that message to the QueryService.

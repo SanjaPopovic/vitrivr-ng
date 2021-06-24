@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {QueryStage} from '../../shared/model/queries/query-stage.model';
 import {QueryTermInterface} from '../../shared/model/queries/interfaces/query-term.interface';
 import {StageChangeEvent} from './stage-change-event.model';
@@ -17,6 +17,8 @@ export class QueryStageComponent {
   @Input() qsList: QueryStage[];
 
   @Input() map_id: number
+
+  @Output() map_id_update = new EventEmitter<StageChangeEvent>();
 
   constructor(private _configService: AppConfig) {
 
@@ -39,6 +41,10 @@ export class QueryStageComponent {
         /* Insert new stage if there are no terms yet*/
         if (this.isLastStage()) {
           this.qsList.push(new QueryStage())
+        }
+        if ( qt.type === 'MAP') {
+          // this.map_id += 1;
+          this.map_id_update.emit(1);
         }
         this.qsList[this.index() + 1].terms.push(qt);
         break;

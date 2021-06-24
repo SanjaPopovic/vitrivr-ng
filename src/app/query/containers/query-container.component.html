@@ -103,7 +103,7 @@
     <mat-divider></mat-divider>
     <!-- actual query container content. -->
     <div style="padding-top:10px;">
-        <app-query-stage  *ngFor="let qs of containerModel.stages" [queryStage]="qs"
+        <app-query-stage  *ngFor="let qs of containerModel.stages" [queryStage]="qs" (map_id_update)="updateMapId()"
                          [qsList]="containerModel.stages" [map_id]="map_id"></app-query-stage>
     </div>
     <!-- button to shift temporal context downward -->

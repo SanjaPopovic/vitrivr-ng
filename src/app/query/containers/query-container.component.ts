@@ -1,4 +1,4 @@
-import {Component, Inject, Input, QueryList, ViewChildren} from '@angular/core';
+import {Component, EventEmitter, Inject, Input, Output, QueryList, ViewChildren} from '@angular/core';
 import {QueryContainerInterface} from '../../shared/model/queries/interfaces/query-container.interface';
 import {Config} from '../../shared/model/config/config.model';
 import {Observable} from 'rxjs';
@@ -7,6 +7,7 @@ import {AppConfig} from '../../app.config';
 import {QueryTerm} from '../../../../openapi/cineast';
 import {MAT_DIALOG_DATA} from '@angular/material/dialog';
 import {Circle} from './map/circle';
+import {StageChangeEvent} from './stage-change-event.model';
 
 @Component({
   selector: 'app-query-container',
@@ -30,6 +31,8 @@ export class QueryContainerComponent {
   private readonly _config: Observable<Config>;
 
   @Input() map_id: number;
+
+  @Output() map_id_update = new EventEmitter<StageChangeEvent>();
 
   /**
    * Constructor; injects ConfigService
@@ -65,6 +68,10 @@ export class QueryContainerComponent {
 
   private get index(): number {
     return this.inList.indexOf(this.containerModel);
+  }
+
+  public updateMapId() {
+    this.map_id_update.emit(1);
   }
 
   /**
