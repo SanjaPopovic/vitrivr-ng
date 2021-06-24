@@ -33,6 +33,9 @@ export class QueryStageComponent {
    */
   onStageChange($event: StageChangeEvent, qt: QueryTermInterface) {
     this.removeQueryTerm(qt);
+    if (qt.type === 'MAP') {
+      this.map_id_update.emit(1);
+    }
     switch ($event) {
       case StageChangeEvent.EARLIER_STAGE:
         this.qsList[this.index() - 1].terms.push(qt);
@@ -41,10 +44,6 @@ export class QueryStageComponent {
         /* Insert new stage if there are no terms yet*/
         if (this.isLastStage()) {
           this.qsList.push(new QueryStage())
-        }
-        if ( qt.type === 'MAP') {
-          // this.map_id += 1;
-          this.map_id_update.emit(1);
         }
         this.qsList[this.index() + 1].terms.push(qt);
         break;
