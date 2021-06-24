@@ -51,6 +51,9 @@ export class MapQueryTermComponent implements AfterViewInit {
 
   ngAfterViewInit(): void {
     this.initMap();
+    if (this.mapTerm.getData().length !== 0 || this.mapTerm.getData() !== null) {
+      this.updateMap(this.mapTerm.getData());
+    }
   }
 
   public updateMap(result: Circle[]) {
@@ -106,5 +109,6 @@ export class MapQueryTermComponent implements AfterViewInit {
     this.mapTerm.data = 'data:application/json;base64,' + btoa(JSON.stringify(this.mapState.map(v => {
       return v;
     })));
+    this.mapTerm.setData(this.mapState);
   }
 }
