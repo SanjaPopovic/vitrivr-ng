@@ -21,7 +21,7 @@ export class MapQueryTermComponent implements AfterViewInit {
   private map;
   @Output() mapState: Circle[] = [];
   @Input() id: number;
-  private map_list = [];
+  map_list = [];
 
   // Instruction to create map is taken from https://www.digitalocean.com/community/tutorials/angular-angular-and-leaflet
   private initMap(): void {

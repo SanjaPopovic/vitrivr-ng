@@ -17,8 +17,6 @@ import {StageChangeEvent} from './stage-change-event.model';
 
 export class QueryContainerComponent {
 
-  private isMapInContainer = false;
-
   /** The StagedQueryContainer this QueryContainerComponent is associated to. */
   @Input() containerModel: QueryContainerInterface;
 
@@ -88,10 +86,9 @@ export class QueryContainerComponent {
   public onToggleButtonClicked(type: QueryTerm.TypeEnum) { // add or remove query term from ONE container
     if (this.containerModel.hasTerm(type)) {
       this.containerModel.removeTerm(type);
-    } else { // here: take new possible id from query-sidebar and send it to query-term
+    } else {
       if (type === 'MAP') {
-        this.isMapInContainer = true;
-        // console.log('the id for a map query term would be = ' + this.map_id);
+        this.updateMapId(); // here: map query term added, so inform query-sidebar that the num_maps must be updated
       }
       this.containerModel.addTerm(type);
     }

@@ -4,3 +4,7 @@
     border: rgb(235, 235, 235) solid 0.5px;
     display: inline-block;
 }
+
+*{
+    list-style: none;
+}
