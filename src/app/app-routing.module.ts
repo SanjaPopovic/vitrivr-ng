@@ -8,6 +8,7 @@ import {MiniGalleryComponent} from './results/gallery/mini-gallery.component';
 import {ListComponent} from './results/list/list.component';
 import {TemporalListComponent} from './results/temporal/temporal-list.component';
 import {SegmentdetailsComponent} from './segmentdetails/segmentdetails.component';
+import {MapViewComponent} from './results/map/map-view.component';
 
 /**
  * Defines the application's routes.
@@ -28,6 +29,7 @@ const appRoutes: Routes = [
   {path: 'list', component: ListComponent},
   {path: 'temporal-list', component: TemporalListComponent},
   {path: 'mini-gallery', component: MiniGalleryComponent},
+  {path: 'map-view', component: MapViewComponent},
   {path: '', component: MiniGalleryComponent}
 ];
 

@@ -35,6 +35,13 @@
         <mat-icon>filter_list</mat-icon>
     </a>
 
+    <span class="spacer-medium"></span>
+
+    <a mat-icon-button matTooltip="Map view" routerLink="/map-view" routerLinkActive="active"
+       skipLocationChange="true" (click)="setActiveView(3)" [color]="!isView(3) ? '' : 'accent'">
+        <mat-icon>location_on</mat-icon>
+    </a>
+
     <span class="spacer-xlarge"></span>
 
     <a *ngIf="(config|async).get('evaluation.active')" mat-icon-button matTooltip="Navigate to evaluation module"
@@ -67,7 +74,7 @@
 
 <mat-sidenav-container fullscreen style="margin-top:75px;">
     <mat-sidenav #querysidenav [opened]="true" class="left" mode="side">
-        <app-query-sidebar></app-query-sidebar>
+        <app-query-sidebar [num_maps]="num_maps" (map_id_update)="updateMapId()"></app-query-sidebar>
     </mat-sidenav>
 
     <mat-sidenav-content id="scrollable">

@@ -12,7 +12,7 @@ import {NotificationService} from './core/basics/notification.service';
 import {AppConfig} from './app.config';
 
 /** Enumeration of all possible views */
-enum View { GALLERY, LIST, TEMPORAL}
+enum View { GALLERY, LIST, TEMPORAL, MAP}
 
 @Component({
   selector: 'app-vitrivr',
@@ -32,6 +32,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   /** Variable to safe currently selected view */
   public _active_view: View;
+
+  public num_maps: number;
 
   /**
    * Default constructor. Subscribe for PING messages at the CineastWebSocketFactoryService.
@@ -71,6 +73,7 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.num_maps = 0;
     const config = this._configService.config;
     /* Initialize stuff which might take 1s+ on the Cineast-Side*/
     this.initLookup(config, this._distinctLookupService);
@@ -111,5 +114,9 @@ export class AppComponent implements OnInit, AfterViewInit {
   /** Check if a given view is active */
   public isView(view: View) {
     return this._active_view === view;
+  }
+
+  updateMapId() {
+    this.num_maps += 1;
   }
 }

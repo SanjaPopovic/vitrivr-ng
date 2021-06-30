@@ -1,4 +1,4 @@
-import {Component, HostListener, OnInit, Output, QueryList, ViewChildren} from '@angular/core';
+import {Component, EventEmitter, HostListener, Input, OnInit, Output, QueryList, ViewChildren} from '@angular/core';
 import {QueryService} from '../core/queries/query.service';
 import {QueryContainerInterface} from '../shared/model/queries/interfaces/query-container.interface';
 import {StagedQueryContainer} from '../shared/model/queries/staged-query-container.model';
@@ -10,6 +10,7 @@ import {FilterService} from '../core/queries/filter.service';
 import {QueryContainerComponent} from './containers/query-container.component';
 import {TemporalFusionFunction} from '../shared/model/results/fusion/temporal-fusion-function.model';
 import {startWith} from 'rxjs/operators';
+import {StageChangeEvent} from './containers/stage-change-event.model';
 
 
 @Component({
@@ -23,7 +24,9 @@ export class QuerySidebarComponent implements OnInit {
   /** A timestamp used to store the timestamp of the last Enter-hit by the user. Required for shortcut detection. */
   private _lastEnter = 0;
 
-  num_maps: number;
+  @Input() num_maps: number;
+
+  @Output() map_id_update = new EventEmitter<StageChangeEvent>();
 
   constructor(private _queryService: QueryService, private _filterService: FilterService, private _eventBus: EventBusService) {
   }
@@ -32,7 +35,6 @@ export class QuerySidebarComponent implements OnInit {
    * Lifecycle Callback (OnInit): Adds a new QueryTermContainer.
    */
   public ngOnInit() {
-    this.num_maps = 0;
     this.addQueryTermContainer();
   }
 
@@ -45,7 +47,7 @@ export class QuerySidebarComponent implements OnInit {
   }
 
   public updateMapId() {
-    this.num_maps += 1;
+    this.map_id_update.emit(1);
   }
 
   /**
