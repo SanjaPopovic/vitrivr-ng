@@ -1,7 +1,7 @@
 <div id="map" class="mapStyle"></div>
 
 <li *ngFor="let date of dates;"><div>{{date | date}}</div></li>
-<!--<ngx-slider [(value)]="value" [options]="options"></ngx-slider>-->
+
 <div style="padding:10px;">
     <p *ngIf="!(dataSource | async) && !loading" class="background-prompt">No results available. Please start a
         search...</p>
@@ -16,7 +16,8 @@
          infiniteScroll>
         <!--(dataSource|async): dataSource returns observable or promise, with async we subscribe. Replace OrderByScorePipe-->
         <ng-container *ngIf="((((dataSource | async) | FilterPipe : (objectFilter | async)) | OrderByDatePipe) | LimitObjectsPipe : count) as pipeRes">
-            <li *ngFor="let date of pipeRes[0];"><div> test {{date.path}}</div></li>
+<!--            <li *ngFor="let date of pipeRes[0];"><div> test {{date.path}}</div></li>-->
+            <div *ngIf="pipeRes[0].length > 0"><ngx-slider [(value)]="value" [options]="options"></ngx-slider></div>
             <div *ngFor="let mediaobject of pipeRes[0]; trackBy: trackByFunction; last as lastObject" class="object">
                 newDay
                 <app-result-segment-preview-tile

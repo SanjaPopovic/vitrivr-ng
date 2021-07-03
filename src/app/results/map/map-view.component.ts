@@ -1,7 +1,7 @@
-import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
+import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
 import {MediaObjectScoreContainer} from '../../shared/model/results/scores/media-object-score-container.model';
 import {MediaSegmentScoreContainer} from '../../shared/model/results/scores/segment-score-container.model';
-import {EMPTY, Observable} from 'rxjs';
+import {Observable} from 'rxjs';
 import {ResultsContainer} from '../../shared/model/results/scores/results-container.model';
 import {AbstractSegmentResultsViewComponent} from '../abstract-segment-results-view.component';
 import {QueryService} from '../../core/queries/query.service';
@@ -12,11 +12,9 @@ import {Router} from '@angular/router';
 import {MatSnackBar} from '@angular/material/snack-bar';
 import {ResolverService} from '../../core/basics/resolver.service';
 import {MatDialog} from '@angular/material/dialog';
-import {VbsSubmissionService} from '../../core/vbs/vbs-submission.service';
 import {AppConfig} from '../../app.config';
-import {StageChangeEvent} from '../../query/containers/stage-change-event.model';
 import * as L from 'leaflet';
-import {Options} from '@angular-slider/ngx-slider';
+import {LabelType, Options} from '@angular-slider/ngx-slider';
 
 @Component({
 
@@ -33,12 +31,32 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
   private map;
 
   public dates: Date[];
+  public value = 0;
   options: Options = {
     floor: 0,
     ceil: 100,
     showTicks: true,
     tickStep: 10
   };
+
+  public sliderOptions() {
+    if (this.dates.length > 0) {
+      this.options = {
+        stepsArray: this.dates.map((date: Date) => {
+          return {value: date.getTime()};
+        }),
+        translate: (value: number, label: LabelType): string => {
+          return new Date(value).toDateString();
+        }
+      };
+    }
+  }
+
+  public getInitPosition() {
+    if (this.dates.length > 0) {
+      this.value = this.dates[0].getTime();
+    }
+  }
 
   constructor(_cdr: ChangeDetectorRef,
               _queryService: QueryService,
@@ -57,7 +75,7 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
 
   ngAfterViewInit(): void {
     this.initMap();
-    }
+  }
 
   private initMap(): void {
     this.map = L.map('map', {
@@ -120,7 +138,11 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
     if (results) {
       this._dataSource = results.mediaobjectsAsObservable;
       // this._dataSource.subscribe(val => {console.log(val.map(v => v.path))});
-      this._dataSource.subscribe(val => {this.dates = val.map(v => new Date(v.path))});
+      this._dataSource.subscribe(val => {
+        this.dates = val.map(v => new Date(v.path)).sort((a: Date, b: Date) => a.valueOf() - b.valueOf());
+        this.sliderOptions();
+        this.getInitPosition()
+      });
     }
   }
 
