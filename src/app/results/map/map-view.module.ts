@@ -10,9 +10,10 @@ import {InfiniteScrollModule} from 'ngx-infinite-scroll';
 import {ResultSegmentPreviewTileModule} from '../result-segment-preview-tile/result-segment-preview-tile.module';
 import {VgCoreModule} from '@videogular/ngx-videogular/core';
 import {MapViewComponent} from './map-view.component';
+import {NgxSliderModule} from '@angular-slider/ngx-slider';
 
 @NgModule({
-  imports: [MaterialModule, BrowserModule, FormsModule, AppRoutingModule, FlexLayoutModule, ContainerPipesModule, VbsModule, InfiniteScrollModule, VgCoreModule, ResultSegmentPreviewTileModule],
+  imports: [MaterialModule, BrowserModule, FormsModule, AppRoutingModule, FlexLayoutModule, ContainerPipesModule, VbsModule, InfiniteScrollModule, VgCoreModule, ResultSegmentPreviewTileModule, NgxSliderModule],
   declarations: [MapViewComponent],
   exports: [MapViewComponent]
 })

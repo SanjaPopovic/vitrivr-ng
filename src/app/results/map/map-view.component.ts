@@ -1,7 +1,7 @@
 import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output} from '@angular/core';
 import {MediaObjectScoreContainer} from '../../shared/model/results/scores/media-object-score-container.model';
 import {MediaSegmentScoreContainer} from '../../shared/model/results/scores/segment-score-container.model';
-import {Observable} from 'rxjs';
+import {EMPTY, Observable} from 'rxjs';
 import {ResultsContainer} from '../../shared/model/results/scores/results-container.model';
 import {AbstractSegmentResultsViewComponent} from '../abstract-segment-results-view.component';
 import {QueryService} from '../../core/queries/query.service';
@@ -16,6 +16,7 @@ import {VbsSubmissionService} from '../../core/vbs/vbs-submission.service';
 import {AppConfig} from '../../app.config';
 import {StageChangeEvent} from '../../query/containers/stage-change-event.model';
 import * as L from 'leaflet';
+import {Options} from '@angular-slider/ngx-slider';
 
 @Component({
 
@@ -30,6 +31,14 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
   protected name = 'map-view';
 
   private map;
+
+  public dates: Date[];
+  options: Options = {
+    floor: 0,
+    ceil: 100,
+    showTicks: true,
+    tickStep: 10
+  };
 
   constructor(_cdr: ChangeDetectorRef,
               _queryService: QueryService,
@@ -110,6 +119,12 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
   protected subscribe(results: ResultsContainer) {
     if (results) {
       this._dataSource = results.mediaobjectsAsObservable;
+      // this._dataSource.subscribe(val => {console.log(val.map(v => v.path))});
+      this._dataSource.subscribe(val => {this.dates = val.map(v => new Date(v.path))});
     }
+  }
+
+  getSliderValue(event) {
+    console.log(event.target.value);
   }
 }
