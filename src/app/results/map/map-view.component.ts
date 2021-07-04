@@ -30,6 +30,8 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
 
   private map;
 
+  public chosenDate: Date;
+
   public dates: Date[];
   public value = 0;
   options: Options = {
@@ -55,6 +57,20 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
   public getInitPosition() {
     if (this.dates.length > 0) {
       this.value = this.dates[0].getTime();
+    }
+  }
+
+  public currentDate(event?: number) {
+    if (event) {
+      this.chosenDate = new Date(event);
+      console.log('first condition');
+      console.log(this.chosenDate);
+    } else {
+      if (this.dates.length > 0) {
+        this.chosenDate = this.dates[0];
+        console.log('second cond.');
+        console.log(this.chosenDate)
+      }
     }
   }
 
@@ -91,6 +107,24 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
 
     tiles.addTo(this.map);
 
+  }
+
+  public test(value: Date, list: MediaObjectScoreContainer[]): boolean {
+    for (const m of list) {
+      if (m.date.valueOf() === value.valueOf()) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  public getMediaObj(value: Date, list: MediaObjectScoreContainer[]): MediaObjectScoreContainer[] {
+    for (const m of list) {
+      if (m.date.valueOf() === value.valueOf()) {
+        return [m];
+      }
+    }
+    return [];
   }
 
   /**
@@ -141,7 +175,8 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
       this._dataSource.subscribe(val => {
         this.dates = val.map(v => new Date(v.path)).sort((a: Date, b: Date) => a.valueOf() - b.valueOf());
         this.sliderOptions();
-        this.getInitPosition()
+        this.getInitPosition();
+        this.currentDate();
       });
     }
   }

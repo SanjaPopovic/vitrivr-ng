@@ -58,6 +58,10 @@ export class MediaObjectScoreContainer extends ScoreContainer implements MediaOb
     return this._metadata;
   }
 
+  get date() {
+    return new Date(this.path);
+  }
+
   /**
    * Method used by the UI/Template part. Can be used to determine whether this MediaObjectScoreContainer
    * is ready to be displayed.
