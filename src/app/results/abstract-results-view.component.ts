@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, OnDestroy, OnInit, Directive } from '@angular/core';
+import {ChangeDetectorRef, OnDestroy, OnInit, Directive} from '@angular/core';
 import {ResultsContainer} from '../shared/model/results/scores/results-container.model';
 import {QueryChange, QueryService} from '../core/queries/query.service';
 import {MediaSegmentScoreContainer} from '../shared/model/results/scores/segment-score-container.model';
@@ -52,12 +52,12 @@ export abstract class AbstractResultsViewComponent<T> implements OnInit, OnDestr
    * @param _snackBar The MatSnackBar component used to display the SnackBar.
    */
   protected constructor(protected _cdr: ChangeDetectorRef,
-              protected _queryService: QueryService,
-              protected _filterService: FilterService,
-              protected _selectionService: SelectionService,
-              protected _eventBusService: EventBusService,
-              protected _router: Router,
-              protected _snackBar: MatSnackBar) {
+                        protected _queryService: QueryService,
+                        protected _filterService: FilterService,
+                        protected _selectionService: SelectionService,
+                        protected _eventBusService: EventBusService,
+                        protected _router: Router,
+                        protected _snackBar: MatSnackBar) {
   }
 
   get loading(): boolean {
@@ -66,6 +66,10 @@ export abstract class AbstractResultsViewComponent<T> implements OnInit, OnDestr
 
   get dataSource(): Observable<T> {
     return this._dataSource;
+  }
+
+  protected setLoading(bool: boolean) {
+    this._loading = bool;
   }
 
   /** The number of items that should be displayed. */

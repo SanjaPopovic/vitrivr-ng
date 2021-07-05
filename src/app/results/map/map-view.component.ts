@@ -1,10 +1,10 @@
 import {AfterViewInit, ChangeDetectionStrategy, ChangeDetectorRef, Component} from '@angular/core';
 import {MediaObjectScoreContainer} from '../../shared/model/results/scores/media-object-score-container.model';
 import {MediaSegmentScoreContainer} from '../../shared/model/results/scores/segment-score-container.model';
-import {Observable} from 'rxjs';
+import {EMPTY, Observable} from 'rxjs';
 import {ResultsContainer} from '../../shared/model/results/scores/results-container.model';
 import {AbstractSegmentResultsViewComponent} from '../abstract-segment-results-view.component';
-import {QueryService} from '../../core/queries/query.service';
+import {QueryChange, QueryService} from '../../core/queries/query.service';
 import {SelectionService} from '../../core/selection/selection.service';
 import {FilterService} from '../../core/queries/filter.service';
 import {EventBusService} from '../../core/basics/event-bus.service';
@@ -15,6 +15,7 @@ import {MatDialog} from '@angular/material/dialog';
 import {AppConfig} from '../../app.config';
 import * as L from 'leaflet';
 import {LabelType, Options} from '@angular-slider/ngx-slider';
+import {Circle} from '../../query/containers/map/circle';
 
 @Component({
 
@@ -29,7 +30,7 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
   protected name = 'map-view';
 
   private map;
-
+  private markers = [];
   public chosenDate: Date;
 
   public dates: Date[];
@@ -64,12 +65,13 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
     if (event) {
       this.chosenDate = new Date(event);
       console.log('first condition');
-      console.log(this.chosenDate);
+      this._dataSource.forEach((val => {
+        this.updateMap(val)
+      }))
     } else {
       if (this.dates.length > 0) {
         this.chosenDate = this.dates[0];
         console.log('second cond.');
-        console.log(this.chosenDate)
       }
     }
   }
@@ -91,6 +93,7 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
 
   ngAfterViewInit(): void {
     this.initMap();
+    this._dataSource.forEach(val => this.updateMap(val)); // when results found, but switched to map view from another view
   }
 
   private initMap(): void {
@@ -106,12 +109,45 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
     });
 
     tiles.addTo(this.map);
+  }
 
+  public updateMap(results: MediaObjectScoreContainer[]) {
+    this.map.eachLayer((layer) => {
+      if (!(layer instanceof L.TileLayer)) {
+        layer.remove();
+      }
+    });
+    this.markers = [];
+    let resultContainer: MediaObjectScoreContainer;
+    if (this.test(this.chosenDate, results)) {
+      const mediaObjScoreContainer_packed = this.getMediaObj(this.chosenDate, results);
+      if (mediaObjScoreContainer_packed.length === 1) {
+        resultContainer = mediaObjScoreContainer_packed[0];
+        const colorOptions = {
+          color: 'red',
+          fillColor: '#f03',
+          fillOpacity: 0
+        }
+        resultContainer.segments.forEach(segment => {
+          if (segment.metadata.get('LOCATION.lat') && segment.metadata.get('LOCATION.lon')) {
+            this.markers.push(L.marker([segment.metadata.get('LOCATION.lat'), segment.metadata.get('LOCATION.lon')], colorOptions))
+          }
+        });
+      }
+    }
+    if (resultContainer) {
+      console.log('markers = ' + this.markers.length);
+      console.log('size of results per day = ' + resultContainer.segments.length);
+    }
+    for (const marker of this.markers) {
+      marker.addTo(this.map);
+    }
   }
 
   public test(value: Date, list: MediaObjectScoreContainer[]): boolean {
     for (const m of list) {
       if (m.date.valueOf() === value.valueOf()) {
+        // console.log(m.date.valueOf() + ' ' + value.valueOf())
         return true;
       }
     }
@@ -171,7 +207,6 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
   protected subscribe(results: ResultsContainer) {
     if (results) {
       this._dataSource = results.mediaobjectsAsObservable;
-      // this._dataSource.subscribe(val => {console.log(val.map(v => v.path))});
       this._dataSource.subscribe(val => {
         this.dates = val.map(v => new Date(v.path)).sort((a: Date, b: Date) => a.valueOf() - b.valueOf());
         this.sliderOptions();
@@ -181,7 +216,41 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
     }
   }
 
+  protected removeItemsFromMap() {
+    this.markers = [];
+    this.map.eachLayer((layer) => {
+      if (!(layer instanceof L.TileLayer)) {
+        layer.remove();
+      }
+    });
+  }
+
   getSliderValue(event) {
     console.log(event.target.value);
+  }
+
+  /**
+   * Invoked whenever the QueryService reports that the results were updated. Causes
+   * the gallery to be re-rendered.
+   *
+   * @param msg QueryChange message
+   */
+  protected onQueryStateChange(msg: QueryChange) {
+    switch (msg) {
+      case 'STARTED':
+        this.setLoading(true);
+        this.subscribe(this._queryService.results);
+        this._dataSource.forEach(val => this.updateMap(val));
+        break;
+      case 'ENDED':
+      case 'ERROR':
+        this.setLoading(false);
+        break;
+      case 'CLEAR':
+        this._dataSource = EMPTY;
+        this.removeItemsFromMap();
+        break;
+    }
+    this._cdr.markForCheck();
   }
 }
