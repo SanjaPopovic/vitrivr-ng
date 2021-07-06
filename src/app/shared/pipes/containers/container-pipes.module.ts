@@ -11,13 +11,16 @@ import {LimitObjectsPipe} from './limit-objects.pipe';
 import {OrderBySegmentIdPipe} from './order-by-segment-id.pipe';
 import {OrderByPipe} from './order-by.pipe';
 import {OrderByDatePipe} from './oder-by-date.pipe';
+import {LimitPathsPipe} from './limit-paths.pipe';
+import {OrderByScoredPathSegmentPipe} from './order-by-scored-path-segment.pipe';
+
 
 @NgModule({
   imports: [],
   // tslint:disable-next-line:max-line-length
-  declarations: [OrderBySegmentPipe, FlattenPathsPipe, OrderObjectByBestPathScorePipe, OrderByScorePipe, FilterPipe, LimitPipe, ArrayObjectSortPipe, SetStringSortPipe, LimitObjectsPipe, OrderBySegmentIdPipe, OrderByPipe, OrderByDatePipe],
+  declarations: [OrderBySegmentPipe, FlattenPathsPipe, OrderObjectByBestPathScorePipe, OrderByScorePipe, FilterPipe, LimitPipe, ArrayObjectSortPipe, SetStringSortPipe, LimitObjectsPipe, LimitPathsPipe, OrderBySegmentIdPipe, OrderByPipe, OrderByScoredPathSegmentPipe, OrderByDatePipe],
   // tslint:disable-next-line:max-line-length
-  exports: [OrderBySegmentPipe, FlattenPathsPipe, OrderObjectByBestPathScorePipe, OrderByScorePipe, FilterPipe, LimitPipe, ArrayObjectSortPipe, SetStringSortPipe, LimitObjectsPipe, OrderBySegmentIdPipe, OrderByPipe, OrderByDatePipe]
+  exports: [OrderBySegmentPipe, FlattenPathsPipe, OrderObjectByBestPathScorePipe, OrderByScorePipe, FilterPipe, LimitPipe, ArrayObjectSortPipe, SetStringSortPipe, LimitObjectsPipe, LimitPathsPipe, OrderBySegmentIdPipe, OrderByPipe, OrderByScoredPathSegmentPipe, OrderByDatePipe]
 })
 export class ContainerPipesModule {
 }

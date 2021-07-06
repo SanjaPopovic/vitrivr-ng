@@ -16,7 +16,7 @@
     </div>
 
     <app-query-container (map_id_update)="updateMapId()" [map_id]="num_maps" *ngFor="let container of containers" [containerModel]=container
-                         [inList]="containers"></app-query-container>
+                         [inList]="containers" [mode]="mode"></app-query-container>
 
     <button (click)="addQueryTermContainer()" mat-fab matTooltip="Add query container">
         <mat-icon>add</mat-icon>
