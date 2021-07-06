@@ -16,6 +16,8 @@ import {AppConfig} from '../../app.config';
 import * as L from 'leaflet';
 import {LabelType, Options} from '@angular-slider/ngx-slider';
 import {Circle} from '../../query/containers/map/circle';
+import {Tag} from '../../core/selection/tag.model';
+import {ColorUtil} from '../../shared/util/color.util';
 
 @Component({
 
@@ -30,6 +32,7 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
   protected name = 'map-view';
 
   private map;
+  private clusters_clicked = []
   private clusters = [];
   private distinct_latlngs = []
   private markers = [];
@@ -124,6 +127,7 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
     this.clusters_markers = [];
     this.distinct_latlngs = [];
     this.clusters = [];
+    this.clusters_clicked = []
     let resultContainer: MediaObjectScoreContainer;
     if (this.test(this.chosenDate, results)) {
       const mediaObjScoreContainer_packed = this.getMediaObj(this.chosenDate, results);
@@ -140,10 +144,11 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
             const index = this.distinct_latlngs.findIndex(latlng => latlng[0] === segment.metadataForKey('LOCATION.lat') && latlng[1] === segment.metadataForKey('LOCATION.lon'));
             if (index > -1) {
               console.log(index)
-              this.clusters[index].push(segment.segmentId);
+              this.clusters[index].push(segment);
             } else {
               this.distinct_latlngs.push([segment.metadataForKey('LOCATION.lat'), segment.metadataForKey('LOCATION.lon')]);
-              this.clusters.push([segment.segmentId]);
+              this.clusters.push([segment]);
+              this.clusters_clicked.push(false);
             }
           }
         });
@@ -159,27 +164,38 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
             if (_this.clusters_markers) {
               const found_cluster = _this.clusters_markers.find(({markerID}) => markerID === e.sourceTarget._leaflet_id);
               console.log('found cluster id:')
-              console.log(found_cluster['clusterID']);
-              console.log(_this.clusters_markers[found_cluster['clusterID']]);
+              /*console.log(found_cluster['clusterID']);
+              console.log(_this.clusters_markers[found_cluster['clusterID']]);*/
               console.log(_this.clusters[found_cluster['clusterID']]);
+              if (_this.clusters_clicked[found_cluster['clusterID']]) {
+                _this.clusters_clicked[found_cluster['clusterID']] = false;
+                for (const seg of _this.clusters[found_cluster['clusterID']]) { // go through all segments ids that are in this cluster
+                  document.getElementById(seg.segmentId).style.backgroundColor = _this.backgroundForSegment(seg);
+                }
+              } else {
+                _this.clusters_clicked[found_cluster['clusterID']] = true;
+                for (const seg of _this.clusters[found_cluster['clusterID']]) { // go through all segments ids that are in this cluster
+                  document.getElementById(seg.segmentId).style.backgroundColor = _this.temporaryBackgroundForSegment(seg);
+                }
+              }
+            }
+          });
+        }
+        /*if (segment.metadata.get('LOCATION.lat') && segment.metadata.get('LOCATION.lon')) {
+          // const pathToThumbnail = this._resolver.pathToThumbnail(segment.objectScoreContainer, segment).replace('http://', '');
+          // console.log(pathToThumbnail)// .bindPopup('<img src={{pathToThumbnail}} alt="image"/>');
+          const newMarker = L.marker([segment.metadata.get('LOCATION.lat'), segment.metadata.get('LOCATION.lon')], colorOptions).addTo(this.map);
+          newMarker.on('click', function (e) {
+            if (_this.clusters_markers) {
+              const found_segment = _this.clusters_markers.find(({markerID}) => markerID === e.sourceTarget._leaflet_id);
+              console.log('found segment id:')
+              console.log(found_segment['segmentID']);
             }
           })
+          this.markers.push(newMarker)
+          this.clusters_markers.push({segmentID: segment.segmentId, markerID: newMarker._leaflet_id})
         }
-          /*if (segment.metadata.get('LOCATION.lat') && segment.metadata.get('LOCATION.lon')) {
-            // const pathToThumbnail = this._resolver.pathToThumbnail(segment.objectScoreContainer, segment).replace('http://', '');
-            // console.log(pathToThumbnail)// .bindPopup('<img src={{pathToThumbnail}} alt="image"/>');
-            const newMarker = L.marker([segment.metadata.get('LOCATION.lat'), segment.metadata.get('LOCATION.lon')], colorOptions).addTo(this.map);
-            newMarker.on('click', function (e) {
-              if (_this.clusters_markers) {
-                const found_segment = _this.clusters_markers.find(({markerID}) => markerID === e.sourceTarget._leaflet_id);
-                console.log('found segment id:')
-                console.log(found_segment['segmentID']);
-              }
-            })
-            this.markers.push(newMarker)
-            this.clusters_markers.push({segmentID: segment.segmentId, markerID: newMarker._leaflet_id})
-          }
-        });*/
+      });*/
       }
     }
     if (resultContainer) {
@@ -269,6 +285,7 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
     this.clusters_markers = [];
     this.clusters = [];
     this.distinct_latlngs = [];
+    this.clusters_clicked = [];
     this.map.eachLayer((layer) => {
       if (!(layer instanceof L.TileLayer)) {
         layer.remove();
@@ -303,5 +320,18 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
         break;
     }
     this._cdr.markForCheck();
+  }
+
+  public temporaryBackgroundForSegment(segment: MediaSegmentScoreContainer): string {
+    const score = segment.score;
+    return this.temporaryBackgroundForScore(score, segment);
+  }
+
+  public temporaryBackgroundForScore(score: number, segment: MediaSegmentScoreContainer): string {
+    const tags: Tag[] = this._selectionService.getTags(segment.segmentId);
+    if (tags.length === 0) {
+      const v = Math.round(255.0 - (score * 255.0));
+      return ColorUtil.rgbToHex(255, v, v);
+    }
   }
 }
