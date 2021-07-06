@@ -31,6 +31,7 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
 
   private map;
   private markers = [];
+  private segment_markers = []
   public chosenDate: Date;
 
   public dates: Date[];
@@ -118,6 +119,7 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
       }
     });
     this.markers = [];
+    this.segment_markers = [];
     let resultContainer: MediaObjectScoreContainer;
     if (this.test(this.chosenDate, results)) {
       const mediaObjScoreContainer_packed = this.getMediaObj(this.chosenDate, results);
@@ -128,9 +130,21 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
           fillColor: '#f03',
           fillOpacity: 0
         }
+        const _this = this;
         resultContainer.segments.forEach(segment => {
           if (segment.metadata.get('LOCATION.lat') && segment.metadata.get('LOCATION.lon')) {
-            this.markers.push(L.marker([segment.metadata.get('LOCATION.lat'), segment.metadata.get('LOCATION.lon')], colorOptions))
+            // const pathToThumbnail = this._resolver.pathToThumbnail(segment.objectScoreContainer, segment).replace('http://', '');
+            // console.log(pathToThumbnail)// .bindPopup('<img src={{pathToThumbnail}} alt="image"/>');
+            const newMarker = L.marker([segment.metadata.get('LOCATION.lat'), segment.metadata.get('LOCATION.lon')], colorOptions).addTo(this.map);
+            newMarker.on('click', function (e) {
+              if (_this.segment_markers) {
+                const found_segment = _this.segment_markers.find(({markerID}) => markerID === e.sourceTarget._leaflet_id);
+                console.log('found segment id:')
+                console.log(found_segment['segmentID']);
+              }
+            })
+            this.markers.push(newMarker)
+            this.segment_markers.push({segmentID: segment.segmentId, markerID: newMarker._leaflet_id})
           }
         });
       }
@@ -139,8 +153,9 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
       console.log('markers = ' + this.markers.length);
       console.log('size of results per day = ' + resultContainer.segments.length);
     }
+    console.log(this.segment_markers);
     for (const marker of this.markers) {
-      marker.addTo(this.map);
+      // marker.addTo(this.map);
     }
   }
 
@@ -218,6 +233,7 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
 
   protected removeItemsFromMap() {
     this.markers = [];
+    this.segment_markers = [];
     this.map.eachLayer((layer) => {
       if (!(layer instanceof L.TileLayer)) {
         layer.remove();
