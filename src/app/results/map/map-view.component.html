@@ -30,7 +30,7 @@
                     <app-result-segment-preview-tile
                             *ngFor="let segment of (mediaobject.segments | FilterPipe : (segmentFilter|async) | OrderBySegmentPipe); trackBy: segmentTracking"
                             [container]="this"
-                            [score]="segment.score" [segment]="segment"></app-result-segment-preview-tile>
+                            [score]="segment.score" [segment]="segment" (markerUpdate)="setChosenMarker($event)"></app-result-segment-preview-tile>
                 </div>
             </ng-container>
         </ng-container>

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {MediaSegmentScoreContainer} from '../../shared/model/results/scores/segment-score-container.model';
 import {AbstractSegmentResultsViewComponent} from '../abstract-segment-results-view.component';
 import {first} from 'rxjs/operators';
@@ -15,6 +15,7 @@ import {QuickViewerComponent} from '../../objectdetails/quick-viewer.component';
 import {Observable} from 'rxjs';
 import {VgApiService} from '@videogular/ngx-videogular/core';
 import {AppConfig} from '../../app.config';
+import {StageChangeEvent} from '../../query/containers/stage-change-event.model';
 
 /**
  * Dedicated component for the preview of a segment.
@@ -48,6 +49,7 @@ export class ResultSegmentPreviewTileComponent implements OnInit {
    */
   @Input() score: number;
 
+  @Output() markerUpdate = new EventEmitter<MediaSegmentScoreContainer>();
   /**
    * A flag whether this preview is in focus or not.
    */
@@ -107,6 +109,9 @@ export class ResultSegmentPreviewTileComponent implements OnInit {
     this._vbs.submitSegment(this.segment);
   }
 
+  public onLookupMapClicked() {
+    this.markerUpdate.emit(this.segment);
+  }
 
   /**
    * Returns true, if the submit (to VBS) button should be displayed for the given segment and false otherwise. This depends on the configuration and

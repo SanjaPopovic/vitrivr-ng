@@ -25,6 +25,11 @@
     </div>
 
     <div *ngIf="inFocus" class="footer" fxLayout="row" fxLayoutAlign="space-evenly">
+        <button (click)="onLookupMapClicked()"
+                mat-icon-button matTooltip="Look up on map">
+            <mat-icon>location_on</mat-icon>
+        </button>
+
         <button (click)="onSubmitButtonClicked()" *ngIf="(showVbsSubmitButton() | async)"
                 mat-icon-button matTooltip="Submit segment to VBS">
             <mat-icon>send</mat-icon>
