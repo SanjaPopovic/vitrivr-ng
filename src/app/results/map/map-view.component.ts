@@ -30,8 +30,10 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
   protected name = 'map-view';
 
   private map;
+  private clusters = [];
+  private distinct_latlngs = []
   private markers = [];
-  private segment_markers = []
+  private clusters_markers = []
   public chosenDate: Date;
 
   public dates: Date[];
@@ -119,7 +121,9 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
       }
     });
     this.markers = [];
-    this.segment_markers = [];
+    this.clusters_markers = [];
+    this.distinct_latlngs = [];
+    this.clusters = [];
     let resultContainer: MediaObjectScoreContainer;
     if (this.test(this.chosenDate, results)) {
       const mediaObjScoreContainer_packed = this.getMediaObj(this.chosenDate, results);
@@ -133,27 +137,56 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
         const _this = this;
         resultContainer.segments.forEach(segment => {
           if (segment.metadata.get('LOCATION.lat') && segment.metadata.get('LOCATION.lon')) {
+            const index = this.distinct_latlngs.findIndex(latlng => latlng[0] === segment.metadataForKey('LOCATION.lat') && latlng[1] === segment.metadataForKey('LOCATION.lon'));
+            if (index > -1) {
+              console.log(index)
+              this.clusters[index].push(segment.segmentId);
+            } else {
+              this.distinct_latlngs.push([segment.metadataForKey('LOCATION.lat'), segment.metadataForKey('LOCATION.lon')]);
+              this.clusters.push([segment.segmentId]);
+            }
+          }
+        });
+        console.log('LOOK HERE')
+        console.log(this.distinct_latlngs);
+        console.log(this.clusters);
+        for (let i = 0; i < this.clusters.length; i++) {
+          const latlngs = this.distinct_latlngs[i];
+          const newMarker = L.marker([latlngs[0], latlngs[1]], colorOptions).addTo(this.map);
+          this.markers.push(newMarker);
+          this.clusters_markers.push({clusterID: i, markerID: newMarker._leaflet_id});
+          newMarker.on('click', function (e) {
+            if (_this.clusters_markers) {
+              const found_cluster = _this.clusters_markers.find(({markerID}) => markerID === e.sourceTarget._leaflet_id);
+              console.log('found cluster id:')
+              console.log(found_cluster['clusterID']);
+              console.log(_this.clusters_markers[found_cluster['clusterID']]);
+              console.log(_this.clusters[found_cluster['clusterID']]);
+            }
+          })
+        }
+          /*if (segment.metadata.get('LOCATION.lat') && segment.metadata.get('LOCATION.lon')) {
             // const pathToThumbnail = this._resolver.pathToThumbnail(segment.objectScoreContainer, segment).replace('http://', '');
             // console.log(pathToThumbnail)// .bindPopup('<img src={{pathToThumbnail}} alt="image"/>');
             const newMarker = L.marker([segment.metadata.get('LOCATION.lat'), segment.metadata.get('LOCATION.lon')], colorOptions).addTo(this.map);
             newMarker.on('click', function (e) {
-              if (_this.segment_markers) {
-                const found_segment = _this.segment_markers.find(({markerID}) => markerID === e.sourceTarget._leaflet_id);
+              if (_this.clusters_markers) {
+                const found_segment = _this.clusters_markers.find(({markerID}) => markerID === e.sourceTarget._leaflet_id);
                 console.log('found segment id:')
                 console.log(found_segment['segmentID']);
               }
             })
             this.markers.push(newMarker)
-            this.segment_markers.push({segmentID: segment.segmentId, markerID: newMarker._leaflet_id})
+            this.clusters_markers.push({segmentID: segment.segmentId, markerID: newMarker._leaflet_id})
           }
-        });
+        });*/
       }
     }
     if (resultContainer) {
       console.log('markers = ' + this.markers.length);
       console.log('size of results per day = ' + resultContainer.segments.length);
     }
-    console.log(this.segment_markers);
+    console.log(this.clusters_markers);
     for (const marker of this.markers) {
       // marker.addTo(this.map);
     }
@@ -233,7 +266,9 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
 
   protected removeItemsFromMap() {
     this.markers = [];
-    this.segment_markers = [];
+    this.clusters_markers = [];
+    this.clusters = [];
+    this.distinct_latlngs = [];
     this.map.eachLayer((layer) => {
       if (!(layer instanceof L.TileLayer)) {
         layer.remove();

@@ -100,12 +100,18 @@ export abstract class AbstractResultsViewComponent<T> implements OnInit, OnDestr
   public backgroundForScore(score: number, segment: MediaSegmentScoreContainer): string {
     const tags: Tag[] = this._selectionService.getTags(segment.segmentId);
     if (tags.length === 0) {
+
       const v = Math.round(255.0 - (score * 255.0));
+      // console.log(ColorUtil.rgbToHex(v, 255, v));
       return ColorUtil.rgbToHex(v, 255, v);
     } else if (tags.length === 1) {
+
+      // console.log(tags[0].colorForRelevance(score))
       return tags[0].colorForRelevance(score);
     } else {
       const width = 100.0 / tags.length;
+
+      // console.log('repeating-linear-gradient(90deg,' + tags.map((t, i) => t.colorForRelevance(score) + ' ' + i * width + '%,' + t.colorForRelevance(score) + ' ' + (i + 1) * width + '%').join(',') + ')');
       return 'repeating-linear-gradient(90deg,' +
         tags.map((t, i) =>
           t.colorForRelevance(score) + ' ' + i * width + '%,' + t.colorForRelevance(score) + ' ' + (i + 1) * width + '%'
