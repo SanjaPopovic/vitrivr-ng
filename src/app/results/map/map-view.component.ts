@@ -19,6 +19,12 @@ import {Circle} from '../../query/containers/map/circle';
 import {Tag} from '../../core/selection/tag.model';
 import {ColorUtil} from '../../shared/util/color.util';
 
+/**
+ * The MapViewComponent is responsible for everything regarding the map-based result presentation.
+ * It provides a slider, where the user can go through each available day, a map with pins and
+ * the result images which are bundled by day. It allows searching for a pin in the map which
+ * corresponds to a specific image and vice versa.
+ */
 @Component({
 
   selector: 'app-map-view',
@@ -71,14 +77,12 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
   public currentDate(event?: number) {
     if (event) {
       this.chosenDate = new Date(event);
-      // console.log('first condition');
       this._dataSource.forEach((val => {
         this.updateMap(val)
       }))
     } else {
       if (this.dates.length > 0) {
         this.chosenDate = this.dates[0];
-        // console.log('second cond.');
       }
     }
   }
@@ -89,23 +93,18 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
       if (idx < 0) {
         // update marker with popup
         const cluster_id = this.clusters.findIndex(row => row.findIndex(elem => elem.segmentId === event.segmentId) > -1);
-        // console.log(this.clusters);
-        // console.log('index = ' + cluster_id);
         let marker_to_change;
         if (cluster_id > -1) {
           const found_cluster = this.clusters_markers.find(({clusterID}) => clusterID === cluster_id);
           if (found_cluster !== undefined) {
-            // console.log(found_cluster['markerID'])
             marker_to_change = this.markers.find(marker => marker._leaflet_id === found_cluster['markerID'])
             const popup = L.popup({'autoClose': false, 'closeOnClick': false, 'closePopupOnClick': false}).setContent('Location of selected image.');
             marker_to_change.bindPopup(popup).openPopup();
             this.segments_with_popups.push(event);
             const _this = this;
             marker_to_change.getPopup().on('remove', function (e) {
-              // console.log(e)
               marker_to_change.unbindPopup()
               const index = _this.segments_with_popups.findIndex(segment => segment === event);
-              // console.log(index)
               if (index === 0) {
                 _this.segments_with_popups.splice(index, 1);
               }
@@ -173,7 +172,6 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
           if (segment.metadata.get('LOCATION.lat') && segment.metadata.get('LOCATION.lon')) {
             const index = this.distinct_latlngs.findIndex(latlng => latlng[0] === segment.metadataForKey('LOCATION.lat') && latlng[1] === segment.metadataForKey('LOCATION.lon'));
             if (index > -1) {
-              // console.log(index)
               this.clusters[index].push(segment);
             } else {
               this.distinct_latlngs.push([segment.metadataForKey('LOCATION.lat'), segment.metadataForKey('LOCATION.lon')]);
@@ -182,9 +180,6 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
             }
           }
         });
-        // console.log('LOOK HERE')
-        // console.log(this.distinct_latlngs);
-        // console.log(this.clusters);
         for (let i = 0; i < this.clusters.length; i++) {
           const latlngs = this.distinct_latlngs[i];
           const newMarker = L.marker([latlngs[0], latlngs[1]]).addTo(this.map);
@@ -193,11 +188,6 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
           newMarker.on('click', function (e) {
             if (_this.clusters_markers) {
               const found_cluster = _this.clusters_markers.find(({markerID}) => markerID === e.sourceTarget._leaflet_id);
-              // console.log('found cluster id:')
-              /*console.log(found_cluster['clusterID']);
-              console.log(_this.clusters_markers[found_cluster['clusterID']]);*/
-              // console.log(_this.clusters[found_cluster['clusterID']]);
-              // console.log(_this.clusters_markers[found_cluster['clusterID']]);
               if (_this.clusters_clicked[found_cluster['clusterID']]) {
                 _this.clusters_clicked[found_cluster['clusterID']] = false;
                 for (const seg of _this.clusters[found_cluster['clusterID']]) { // go through all segments ids that are in this cluster
@@ -214,20 +204,11 @@ export class MapViewComponent extends AbstractSegmentResultsViewComponent<MediaO
         }
       }
     }
-    if (resultContainer) {
-      // console.log('markers = ' + this.markers.length);
-      // console.log('size of results per day = ' + resultContainer.segments.length);
-    }
-    // console.log(this.clusters_markers);
-    for (const marker of this.markers) {
-      // marker.addTo(this.map);
-    }
   }
 
   public test(value: Date, list: MediaObjectScoreContainer[]): boolean {
     for (const m of list) {
       if (m.date.valueOf() === value.valueOf()) {
-        // console.log(m.date.valueOf() + ' ' + value.valueOf())
         return true;
       }
     }

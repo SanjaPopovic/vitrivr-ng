@@ -25,6 +25,12 @@ const iconDefault = L.icon({
 });
 L.Marker.prototype.options.icon = iconDefault;
 
+/**
+ * This component is responsible for the popup-map where the user can actually create
+ * the query by surrounding areas (circles) or by searching for specific locations (pin) in a provided list.
+ * This component also updates the popup-map when something is drawn (circle) or added (pin) on/to the map.
+ * When the user closes the popup-map, the circles and pins are sent to the MapQueryTermComponent.
+ */
 @Component({
   selector: 'app-qt-map-dialog',
   templateUrl: 'map-dialog.component.html',
@@ -39,7 +45,7 @@ export class MapDialogComponent implements OnInit {
   private markers: Circle[] = [];
   private drawnCircles: Circle[] = []; // tags
   private test_markers: Array<{ [semantic_name: string]: [Circle, L.marker]; }>;
-  private test_drawnCircles: (number|L.circle)[][]; // [] = [rad, lon, lat, L.circle] correspond to drawnCircles, has ref to L.Circle
+  private test_drawnCircles: (number | L.circle)[][]; // [] = [rad, lon, lat, L.circle] correspond to drawnCircles, has ref to L.Circle
 
   private drawnItems;
   /** List of tag fields currently displayed. */
@@ -159,8 +165,6 @@ export class MapDialogComponent implements OnInit {
       this.test_drawnCircles.push([this.drawnCircles[i].rad, this.drawnCircles[i].lon, this.drawnCircles[i].lat, updatedCircle])
       updatedCircle.addTo(this.drawnItems);
     }
-
-    // this.test_drawnCircles.push([circle.rad, circle.lon, circle.lat, layer]);
   }
 
   public updateMarkers(marker: Circle) {
@@ -185,7 +189,6 @@ export class MapDialogComponent implements OnInit {
 
   public deleteMarker(marker?: Circle) {
     if (typeof marker === 'undefined') { // if circle or marker are deleted in map!
-      console.log('in undefined');
       const markers_on_map = [];
       const circles_on_map: Circle[] = [];
       this.popUpMap.eachLayer(function (layer) {
@@ -239,7 +242,6 @@ export class MapDialogComponent implements OnInit {
       }
       this.popUpMap.eachLayer((layer) => {
         if (layer instanceof L.Circle) {
-          console.log('deleteeeed')
           layer.remove();
         }
       });
@@ -277,10 +279,8 @@ export class MapDialogComponent implements OnInit {
             layer.unbindToolTip();
           }
         });*/
-        console.log('hello');
         this.popUpMap.eachLayer((layer) => {
           if (layer instanceof L.Circle) {
-            console.log('deleteeeed')
             layer.remove();
           }
         });
@@ -378,22 +378,13 @@ export class MapDialogComponent implements OnInit {
     }
   }
 
-  /**
-   * Add the specified tag to the list of tags.
-   *
-   * @param {Tag} tag The tag that should be added.
-   */
   public addLocation(location: Circle) {
     this.markers.push(location); // add new location as tag
     this.updateMarkers(location); // add new location as marker in map
     this.field.formControl.setValue('');
   }
 
-  /**
-   * Removes the specified tag from the list of tags.
-   *
-   * @param {Tag} tag The tag that should be removed.
-   */
+
   public removeLocation(location: Circle) {
     if (location.semantic_name !== '') { // marker is deleted by removing tag
       const index = this.markers.indexOf(location);
@@ -441,8 +432,8 @@ export class FieldGroup {
       map((location: string) => {
         if (location.length >= 2) {
           return this._locations.getDistinctLocations().pipe(first()).map(res => res.columns.filter(row =>
-              location.toLowerCase().split(' ').every(r => row['semantic_name'].toLowerCase().split(' ').find(a => a.indexOf(r) > -1))
-            // row['semantic_name'].toLowerCase().split(' ').some(e => e.indexOf())
+                location.toLowerCase().split(' ').every(r => row['semantic_name'].toLowerCase().split(' ').find(a => a.indexOf(r) > -1))
+              // row['semantic_name'].toLowerCase().split(' ').some(e => e.indexOf())
             )
           );
         } else {

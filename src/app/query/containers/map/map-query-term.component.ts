@@ -9,6 +9,10 @@ import {MapDialogComponent} from './map-dialog.component';
 import {Tag} from '../../../../../openapi/cineast';
 import {Circle} from './circle';
 
+/**
+ * This component is responsible for the view which gets created when the user creates a map query term.
+ * It updates the mini-map if the user added new circles or pins to the popup-map (MapDialogComponent).
+ */
 @Component({
   selector: 'app-qt-map',
   templateUrl: 'map-query-term.component.html',
